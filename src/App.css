@@ -1,28 +1,174 @@
+body {
+  margin: 0;
+  height: 100vh;
+}
+
+* {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.0em;
+}
+
 .App {
-  text-align: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1.4fr 6fr .9fr 11fr;
+  grid-gap: 1px;
+  height: 100vh;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+.App.hide-list {
+  grid-template-rows: 1.4fr 0fr 0fr 11fr;
 }
 
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
+.input-area {
+  background-color: green;
+  grid-column: 1 / span 2;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 2fr;
+  grid-template-rows: 1fr 1.1fr;
 }
 
-.App-title {
-  font-size: 1.5em;
+.search-places {
+  grid-column: 1 / span 4;
+  grid-row: 2;
 }
 
-.App-intro {
-  font-size: large;
+.search-places select {
+  width: 100%;
+  height: 100%;
+  border: none;
+  padding-left: 7px;
+  background-color: #b7d3e2;
 }
 
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.neighborhhood-location {
+  grid-column: 1 / span 4;
+  grid-row: 1;
+  display: flex;
+}
+
+.neighborhhood-location #location-input {
+  width: 76%;
+  padding-left: 10px;
+  background-color: #34a0db;
+  color: #fff;
+  border: 0;
+}
+
+.neighborhhood-location #location-button,
+.neighborhhood-location #hide-list-button
+ {
+  width: 12%;
+  background-color: #b7d3e2;
+}
+
+.place-list {
+  grid-column: 1 / span 2;
+  grid-row: 2;
+  overflow: hidden;
+  position: relative;
+}
+
+.place-list.hide-list,
+.list-footer.hide-list {
+  display: none;
+}
+
+.place-list ul {
+  list-style: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: -25px;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.place-list ul li {
+  width: 48%;
+  float: left;
+  border: 1px dotted grey;
+  padding: 10px 0 10px 2px;
+  margin: 0;
+}
+
+.place-list ul li .selected {
+  background-color: grey;
+  color: #fff;
+}
+
+.list-footer {
+  background-image: url('./icons/Powered-by-Foursquare-full-color-200.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  grid-column: 1 / span 2;
+  grid-row: 3;
+}
+
+.list-footer p {
+  margin: 0;
+}
+
+.map-area {
+  background-color: pink;
+  grid-column: 1 / span 2;
+  grid-row: 4;
+}
+
+.map-area #map {
+  width: 100%;
+}
+
+@media only screen and (orientation: landscape) {
+  .App {
+    grid-template-columns: 2fr 1fr 1fr 2fr;
+    grid-template-rows: 1.2fr 16fr 1.3fr;
+  }
+
+  .App.hide-list {
+    grid-template-rows: 1.4fr 17.9fr 0fr 0fr;
+    grid-template-columns: 0fr 1fr 1fr 2fr;
+  }
+
+  .input-area {
+    grid-column: 1 / span 4;
+    grid-row: 1
+  }
+
+  .search-places {
+    grid-column: 1 ;
+    grid-row: 1 / span 2;
+  }
+
+  .neighborhhood-location {
+    grid-column: 2 / span 3;
+    grid-row: 1 / span 2;
+  }
+
+  .place-list {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .place-list ul li {
+    width: 99%;
+  }
+
+  .list-footer {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .map-area {
+    grid-column: 2 / span 3;
+    grid-row: 2 / span 2;
+  }
 }
