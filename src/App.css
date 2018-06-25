@@ -32,26 +32,32 @@ body {
 .search-places {
   grid-column: 1 / span 4;
   grid-row: 2;
+  display: grid;
+  align-items: center;
 }
 
 .search-places select {
   width: 100%;
   height: 100%;
+  min-height: 39px;
   border: none;
   padding-left: 7px;
-  background-color: #b7d3e2;
+  background: url('./icons/filter.png') no-repeat right #b7d3e2;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 }
 
 .neighborhhood-location {
   grid-column: 1 / span 4;
   grid-row: 1;
   display: flex;
+  min-height: 39px;
 }
 
 .neighborhhood-location #location-input {
   width: 76%;
   padding-left: 10px;
-  background-color: #34a0db;
+  background-color: #1f7bad;
   color: #fff;
   border: 0;
 }
@@ -90,14 +96,18 @@ body {
 
 .place-list ul li {
   width: 48%;
+  height: 35px;
   float: left;
-  border: 1px dotted grey;
-  padding: 10px 0 10px 2px;
+  border: 1px solid #ecf9ea;
+  padding: 4px 0 4px 2px;
   margin: 0;
+  overflow: hidden;
+  display: grid;
+  align-items: center;
 }
 
-.place-list ul li .selected {
-  background-color: grey;
+.place-list ul li.selected {
+  background-color: #1f7bad;
   color: #fff;
 }
 
