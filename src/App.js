@@ -8,7 +8,8 @@ class App extends Component {
     neighborhhoodLocation: {
       lat: 38.24120531635877,
       lng: 21.7349910736084
-    }
+    },
+    zoom: 17
   };
 
   results = data;
@@ -69,7 +70,10 @@ class App extends Component {
 
         <div className="list-footer"/>
         <div className="map-area">
-          <MapContainer/>
+          <MapContainer
+            initialCenter={this.state.neighborhhoodLocation}
+            zoom={this.state.zoom}
+          />
         </div>
       </div>
     );

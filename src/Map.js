@@ -1,19 +1,35 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 
 export class Map extends Component {
-  loadMap() {
-    const mapRef = this.refs.map; // 'mapRef' is the React component, with 'map' ref, created in render below.
-    const node = ReactDOM.findDOMNode(mapRef); // Finds the 'mapRef' in React DOM and stores the corresponding DOM element in 'node'
-    const mapConfig = {
-      center: {lat: 38.24120531635877, lng: 21.7349910736084},
-      zoom: 17
-    }
+  static propTypes = {
+    google: PropTypes.object.isRequired,
+    zoom: PropTypes.number.isRequired,
+    initialCenter: PropTypes.object.isRequired
+  }
 
-    // Sets node's dimentions equal to 'map-area' div's dimentions
-    node.style.width = node.parentNode.parentNode.clientWidth + 'px';
-    node.style.height = node.parentNode.parentNode.clientHeight + 'px';
-    this.map = new this.props.google.maps.Map(node, mapConfig);
+  loadMap() {
+    // If google maps API is available
+    if (this.props && this.props.google) {
+      let {initialCenter, zoom} = this.props;
+
+      // 'mapRef' is the React component, with 'map' ref, created in render below.
+      const mapRef = this.refs.map;
+      // Find the 'mapRef' in React DOM and store the corresponding DOM element in 'node'
+      const node = ReactDOM.findDOMNode(mapRef);
+
+      const mapConfig = {
+        center: initialCenter,
+        zoom: zoom,
+        clickableIcons: false
+      }
+
+      // Sets node's dimentions equal to 'map-area' div's dimentions
+      node.style.width = node.parentNode.parentNode.clientWidth + 'px';
+      node.style.height = node.parentNode.parentNode.clientHeight + 'px';
+      this.map = new this.props.google.maps.Map(node, mapConfig);
+    }
   }
 
   // If google API has already been loaded, then loadMap
@@ -21,7 +37,7 @@ export class Map extends Component {
     this.loadMap();
   }
 
-  // Else wait for the Map to be updated, when Google Maps API will be asynchronously loaded and then loadMap
+  // Else wait for the Map to be updated when Google Maps API will be asynchronously loaded and then loadMap
   componentDidUpdate(prepProps, prenState) {
     if (prepProps.google !== this.props.google) {
       this.loadMap();
