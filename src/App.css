@@ -138,10 +138,6 @@ body {
   grid-row: 4;
 }
 
-.map-area #map {
-  width: 100%;
-}
-
 @media only screen and (orientation: landscape) {
   .App {
     grid-template-columns: 2fr 1fr 1fr 2fr;

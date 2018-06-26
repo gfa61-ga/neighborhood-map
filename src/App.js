@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 import './App.css';
 import data from './results.js';
-
+import MapContainer from'./MapContainer.js';
 
 class App extends Component {
   state = {
     neighborhhoodLocation: {
-      lat: 38.2415052,
-      lng: 21.7367451
+      lat: 38.24120531635877,
+      lng: 21.7349910736084
     }
-  }
+  };
 
   results = data;
   categories = [];
@@ -17,15 +17,15 @@ class App extends Component {
   componentWillMount() {
     this.categories = this.results.response.groups[0].items.map(item =>
       item.venue.categories[0].shortName
-    )
+    );
 
-    this.categories.sort()
+    this.categories.sort();
 
     this.categories = this.categories.filter((category, index, array) =>
       category !== array[index+1]
-    )
+    );
 
-    this.categories.unshift("All Places")
+    this.categories.unshift("All Places");
   }
 
   render() {
@@ -46,7 +46,7 @@ class App extends Component {
             </select>
           </div>
           <div className="neighborhhood-location">
-            <input id="location-input" type="text" defaultValue="Psila Alonia, Patras, Greece" aria-label="Neighborhhood Location"/>
+            <input id="location-input" type="text" defaultValue="Pl. Ipsilon Alonion, Patras, Greece" aria-label="Neighborhhood Location"/>
             <input id="location-button" type="button" value="Go" aria-label="Go to location"/>
             <input id="hide-list-button" type="button" value="&#9776;" aria-label="Toggle place list's visibility"/>
           </div>
@@ -65,13 +65,11 @@ class App extends Component {
                 )
               }
           </ul>
-        </div>
+       </div>
 
-        <div className="list-footer">
-        </div>
-
+        <div className="list-footer"/>
         <div className="map-area">
-          <div id="map"/>
+          <MapContainer/>
         </div>
       </div>
     );
