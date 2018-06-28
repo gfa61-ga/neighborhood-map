@@ -10,30 +10,27 @@ class App extends Component {
       lng: 21.7349910736084
     },
     zoom: 17,
-    placeListVisibility: true
+    results: initialData
   };
 
-  results = initialData;
+
   categories = [];
 
   componentWillMount() {
-    this.createCategories();
+    this.createCategories(this.state.results);
   }
 
   componentDidMount() {
     document.getElementById('hide-list-button').addEventListener('click', this.togglePlaceList);
   }
 
-
-  togglePlaceList = () => {
+  togglePlaceList() {
     document.querySelector(".App").classList.toggle('hide-list');
-    this.setState((prevState) => ({
-      placeListVisibility: (prevState.placeListVisibility === true ? false : true)
-    })
-  )}
+  }
 
-  createCategories() {
-    this.categories = this.results.response.groups[0].items.map(item =>
+  createCategories(results) {
+    this.categories = [];
+    this.categories = results.response.groups[0].items.map(item =>
       item.venue.categories[0].shortName
     );
 
@@ -44,6 +41,25 @@ class App extends Component {
     );
 
     this.categories.unshift("All Places");
+  }
+
+  onChangeNeighborhood = (lat,lng) => {
+    fetch('https://api.foursquare.com/v2/venues/explore?ll='
+      + lat + ',' + lng +
+      '&client_id=HPAOKFVI0WPGYVFGZW4QQVZTJPKCBCPWPQT3WULI3TKLTRUR' +
+      '&client_secret=NILFKLKATY20ZQU1Q2OZVMRRPYMONJMG4OQ144SHHIEXGAMJ&v=20180625')
+      .then(result => result.json())
+      .then(result => {
+        this.createCategories(result);
+        this.setState({
+          results: result,
+          neighborhhoodLocation: {
+          lat: lat,
+          lng: lng
+        }
+        });
+      })
+      .catch(error => console.log(error));
   }
 
   render() {
@@ -63,8 +79,9 @@ class App extends Component {
               }
             </select>
           </div>
-          <div className="neighborhhood-location">
-            <input id="location-input" type="text" defaultValue="Pl. Ipsilon Alonion, Patras, Greece" aria-label="Neighborhhood Location"/>
+          <div className="neighborhood-location">
+            <input id="location-input" type="text"
+              defaultValue="Pl. Ipsilon Alonion, Patras, Greece" aria-label="Neighborhhood Location"/>
             <input id="location-button" type="button" value="Go" aria-label="Go to location"/>
             <input id="hide-list-button" type="button" value="&#9776;" aria-label="Toggle place list's visibility"/>
           </div>
@@ -73,7 +90,7 @@ class App extends Component {
         <div className="place-list">
           <ul role="menu" aria-label="menu">
               {
-                this.results.response.groups[0].items.map(item =>
+                this.state.results.response.groups[0].items.map(item =>
                   <li
                     key={item.venue.id}
                     role="menuitem"
@@ -90,7 +107,7 @@ class App extends Component {
           <MapContainer
             initialCenter={this.state.neighborhhoodLocation}
             zoom={this.state.zoom}
-            placeListVisibility={this.state.placeListVisibility}
+            onChangeNeighborhood={this.onChangeNeighborhood}
           />
         </div>
       </div>

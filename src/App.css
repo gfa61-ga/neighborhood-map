@@ -47,14 +47,14 @@ body {
   -moz-appearance: none;
 }
 
-.neighborhhood-location {
+.neighborhood-location {
   grid-column: 1 / span 4;
   grid-row: 1;
   display: flex;
   min-height: 39px;
 }
 
-.neighborhhood-location #location-input {
+.neighborhood-location #location-input {
   width: 76%;
   padding-left: 10px;
   background-color: #1f7bad;
@@ -62,8 +62,8 @@ body {
   border: 0;
 }
 
-.neighborhhood-location #location-button,
-.neighborhhood-location #hide-list-button
+.neighborhood-location #location-button,
+.neighborhood-location #hide-list-button
  {
   width: 12%;
   background-color: #b7d3e2;
@@ -159,7 +159,7 @@ body {
     grid-row: 1 / span 2;
   }
 
-  .neighborhhood-location {
+  .neighborhood-location {
     grid-column: 2 / span 3;
     grid-row: 1 / span 2;
   }

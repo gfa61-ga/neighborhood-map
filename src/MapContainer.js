@@ -15,7 +15,7 @@ export class MapContainer extends Component {
           google={this.props.google}
           initialCenter={this.props.initialCenter}
           zoom={this.props.zoom}
-          placeListVisibility={this.props.placeListVisibility}
+          onChangeNeighborhood={this.props.onChangeNeighborhood}
         />
     );
   }
@@ -23,6 +23,7 @@ export class MapContainer extends Component {
 
 // GoogleApiWrapper asynchronously loads the Google Maps API and passes is to the MapContainer as 'google' prop
 export default GoogleApiWrapper({
-  apiKey: 'AIzaSyDoF5xjAASOfupCeQwuTUrPYdRwrYvC6AI'
+  apiKey: 'AIzaSyDoF5xjAASOfupCeQwuTUrPYdRwrYvC6AI',
+  libraries: ['places']
 })(MapContainer);
 
