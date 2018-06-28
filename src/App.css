@@ -17,7 +17,7 @@ body {
 }
 
 .App.hide-list {
-  grid-template-rows: 1.4fr 0 0 11fr;
+  grid-template-rows: 1.4fr 0 0 17.9fr;
 }
 
 .input-area {
@@ -132,7 +132,7 @@ body {
   margin: 0;
 }
 
-.map-area {
+#map-area {
   background-color: pink;
   grid-column: 1 / span 2;
   grid-row: 4;
@@ -145,7 +145,7 @@ body {
   }
 
   .App.hide-list {
-    grid-template-rows: 1.4fr 17.9fr 0 0;
+    grid-template-rows: 1.2fr 17.3fr 0 0;
     grid-template-columns: 0 1fr 1fr 2fr;
   }
 
@@ -183,7 +183,7 @@ body {
     grid-row: 3;
   }
 
-  .map-area {
+  #map-area {
     grid-column: 2 / span 3;
     grid-row: 2 / span 2;
   }

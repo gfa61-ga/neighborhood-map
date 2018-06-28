@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
-import data from './results.js';
+import initialData from './initial-data.js';
 import MapContainer from'./MapContainer.js';
 
 class App extends Component {
@@ -9,13 +9,30 @@ class App extends Component {
       lat: 38.24120531635877,
       lng: 21.7349910736084
     },
-    zoom: 17
+    zoom: 17,
+    placeListVisibility: true
   };
 
-  results = data;
+  results = initialData;
   categories = [];
 
   componentWillMount() {
+    this.createCategories();
+  }
+
+  componentDidMount() {
+    document.getElementById('hide-list-button').addEventListener('click', this.togglePlaceList);
+  }
+
+
+  togglePlaceList = () => {
+    document.querySelector(".App").classList.toggle('hide-list');
+    this.setState((prevState) => ({
+      placeListVisibility: (prevState.placeListVisibility === true ? false : true)
+    })
+  )}
+
+  createCategories() {
     this.categories = this.results.response.groups[0].items.map(item =>
       item.venue.categories[0].shortName
     );
@@ -69,10 +86,11 @@ class App extends Component {
        </div>
 
         <div className="list-footer"/>
-        <div className="map-area">
+        <div id="map-area">
           <MapContainer
             initialCenter={this.state.neighborhhoodLocation}
             zoom={this.state.zoom}
+            placeListVisibility={this.state.placeListVisibility}
           />
         </div>
       </div>

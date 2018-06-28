@@ -15,6 +15,7 @@ export class MapContainer extends Component {
           google={this.props.google}
           initialCenter={this.props.initialCenter}
           zoom={this.props.zoom}
+          placeListVisibility={this.props.placeListVisibility}
         />
     );
   }

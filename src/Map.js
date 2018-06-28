@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
 export class Map extends Component {
@@ -14,21 +13,13 @@ export class Map extends Component {
     if (this.props && this.props.google) {
       let {initialCenter, zoom} = this.props;
 
-      // 'mapRef' is the React component, with 'map' ref, created in render below.
-      const mapRef = this.refs.map;
-      // Find the 'mapRef' in React DOM and store the corresponding DOM element in 'node'
-      const node = ReactDOM.findDOMNode(mapRef);
-
       const mapConfig = {
         center: initialCenter,
         zoom: zoom,
         clickableIcons: false
       }
 
-      // Sets node's dimentions equal to 'map-area' div's dimentions
-      node.style.width = node.parentNode.parentNode.clientWidth + 'px';
-      node.style.height = node.parentNode.parentNode.clientHeight + 'px';
-      this.map = new this.props.google.maps.Map(node, mapConfig);
+      this.map = new this.props.google.maps.Map(document.getElementById('map-area'), mapConfig);
     }
   }
 
@@ -39,16 +30,14 @@ export class Map extends Component {
 
   // Else wait for the Map to be updated when Google Maps API will be asynchronously loaded and then loadMap
   componentDidUpdate(prepProps, prenState) {
-    if (prepProps.google !== this.props.google) {
+    if (prepProps.google !== this.props.google || prepProps.placeListVisibility !== this.props.placeListVisibility) {
       this.loadMap();
     }
   }
 
   render() {
     return (
-      <div
-        ref="map"
-      >
+      <div>
         Loading map..
       </div>
     );
