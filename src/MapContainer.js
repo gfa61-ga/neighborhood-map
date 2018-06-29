@@ -16,6 +16,7 @@ export class MapContainer extends Component {
           initialCenter={this.props.initialCenter}
           zoom={this.props.zoom}
           onChangeNeighborhood={this.props.onChangeNeighborhood}
+          results={this.props.results}
         />
     );
   }

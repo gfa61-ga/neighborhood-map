@@ -29,6 +29,7 @@ class App extends Component {
   }
 
   createCategories(results) {
+           console.log(this.state.results)
     this.categories = [];
     this.categories = results.response.groups[0].items.map(item =>
       item.venue.categories[0].shortName
@@ -46,20 +47,21 @@ class App extends Component {
   onChangeNeighborhood = (lat,lng) => {
     fetch('https://api.foursquare.com/v2/venues/explore?ll='
       + lat + ',' + lng +
+      '&sortByDistance=1' +
       '&client_id=HPAOKFVI0WPGYVFGZW4QQVZTJPKCBCPWPQT3WULI3TKLTRUR' +
       '&client_secret=NILFKLKATY20ZQU1Q2OZVMRRPYMONJMG4OQ144SHHIEXGAMJ&v=20180625')
-      .then(result => result.json())
-      .then(result => {
-        this.createCategories(result);
-        this.setState({
-          results: result,
-          neighborhhoodLocation: {
+    .then(result => result.json())
+    .then(result => {
+      this.createCategories(result);
+      this.setState({
+        results: result,
+        neighborhhoodLocation: {
           lat: lat,
           lng: lng
         }
-        });
-      })
-      .catch(error => console.log(error));
+      });
+    })
+    .catch(error => console.log(error));
   }
 
   render() {
@@ -108,6 +110,7 @@ class App extends Component {
             initialCenter={this.state.neighborhhoodLocation}
             zoom={this.state.zoom}
             onChangeNeighborhood={this.onChangeNeighborhood}
+            results={this.state.results}
           />
         </div>
       </div>
