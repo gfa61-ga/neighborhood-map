@@ -17,6 +17,9 @@ export class MapContainer extends Component {
           zoom={this.props.zoom}
           onChangeNeighborhood={this.props.onChangeNeighborhood}
           results={this.props.results}
+          onClickMarker={this.props.onClickMarker}
+          selectedItemId={this.props.selectedItemId}
+          selectedCategory={this.props.selectedCategory}
         />
     );
   }

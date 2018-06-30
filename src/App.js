@@ -10,9 +10,10 @@ class App extends Component {
       lng: 21.7349910736084
     },
     zoom: 17,
-    results: initialData
+    results: initialData,
+    selectedItemId: '',
+    selectedCategory: 'All Places'
   };
-
 
   categories = [];
 
@@ -22,6 +23,17 @@ class App extends Component {
 
   componentDidMount() {
     document.getElementById('hide-list-button').addEventListener('click', this.togglePlaceList);
+
+        document.getElementById('place-filter').addEventListener('change', () => {
+         this.setState({selectedCategory: document.getElementById('place-filter').value});
+         console.log(this.state.selectedCategory)
+        });
+
+    document.querySelector('.place-list').addEventListener('click', e => this.onClickListItem(e));
+  }
+
+  onClickListItem = (event) => {
+        this.setState({selectedItemId: event.target.id})
   }
 
   togglePlaceList() {
@@ -29,7 +41,6 @@ class App extends Component {
   }
 
   createCategories(results) {
-           console.log(this.state.results)
     this.categories = [];
     this.categories = results.response.groups[0].items.map(item =>
       item.venue.categories[0].shortName
@@ -64,6 +75,10 @@ class App extends Component {
     .catch(error => console.log(error));
   }
 
+  onClickMarker = (markerId) => {
+    this.setState({selectedItemId: markerId})
+  }
+
   render() {
     return (
       <div className="App">
@@ -92,11 +107,17 @@ class App extends Component {
         <div className="place-list">
           <ul role="menu" aria-label="menu">
               {
-                this.state.results.response.groups[0].items.map(item =>
+                this.state.results.response.groups[0].items.filter(item => {
+                   return item.venue.categories[0].shortName === this.state.selectedCategory || this.state.selectedCategory === 'All Places'
+                 }
+                ).map(item =>
                   <li
                     key={item.venue.id}
+                    id={item.venue.id}
                     role="menuitem"
-                    tabIndex="0">
+                    tabIndex="0"
+                    className={item.venue.id === this.state.selectedItemId ? 'selected' : ''}
+                    >
                     {item.venue.name}
                   </li>
                 )
@@ -111,6 +132,10 @@ class App extends Component {
             zoom={this.state.zoom}
             onChangeNeighborhood={this.onChangeNeighborhood}
             results={this.state.results}
+            onClickMarker={this.onClickMarker}
+            selectedItemId={this.state.selectedItemId}
+            selectedCategory={this.state.selectedCategory}
+
           />
         </div>
       </div>
