@@ -134,7 +134,8 @@ body {
 }
 
 #map-area {
-  background-color: pink;
+  background-color: #d0d0d0;
+
   grid-column: 1 / span 2;
   grid-row: 4;
 }
@@ -235,5 +236,5 @@ body {
 }
 
 .alert-window {
-    background-color: #b7d3e2;
+  background-color: #b7d3e2;
 }

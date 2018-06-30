@@ -13,6 +13,7 @@ export class Map extends Component {
   markers = [];
   selectedMarker ={}
   placeInfoWindow = {};
+  bounds = {};
 
   loadMap() {
     // If google maps API is available
@@ -141,10 +142,23 @@ export class Map extends Component {
 
       this.placeInfoWindow  = new this.props.google.maps.InfoWindow();
 
+      this.placeInfoWindow.addListener('closeclick', () => {
+        this.placeInfoWindow.marker = null;
+        this.props.onClickMarker('');
+      });
+
       let ref = this;
       document.getElementById('location-button').addEventListener('click', (function() {
         this.getNewLocation(ref);
       }).bind(ref));
+
+
+      this.props.google.maps.event.addDomListener(window, "resize", () => {
+        this.props.google.maps.event.trigger(this.map, "resize");
+        this.map.fitBounds(this.bounds);
+      });
+
+
 
      this.createMarkers()
     }
@@ -154,7 +168,7 @@ export class Map extends Component {
     let geocoder = new this.props.google.maps.Geocoder();
     let address = document.getElementById('location-input').value;
     if (address === '') {
-      swal('You must enter an area, or address!', {
+      swal('You must enter an area, or address!', '!!!', {
         className: "alert-window",
       });
     } else {
@@ -168,8 +182,8 @@ export class Map extends Component {
             ref.props.onChangeNeighborhood(newLat, newLng);
           } else {
             swal('We could not find that location!', 'Try entering a more specific place.',  {
-        className: "alert-window",
-      });
+              className: "alert-window",
+            });
           }
         });
       }
@@ -177,15 +191,14 @@ export class Map extends Component {
 
   createMarkers() {
     this.markers = [];
-    const bounds = new this.props.google.maps.LatLngBounds();
-
+    this.bounds = new this.props.google.maps.LatLngBounds();
     this.props.results.response.groups[0].items.forEach(item => {
       const position = item.venue.location;
       const title = item.venue.location.name;
 
 
       const markerImage = new this.props.google.maps.MarkerImage(
-        'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|1f7bad|40|_|%E2%80%A2',
+        'https://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|1f7bad|40|_|%E2%80%A2',
         new this.props.google.maps.Size(21, 34),
         new this.props.google.maps.Point(0, 0),
         new this.props.google.maps.Point(10, 34),
@@ -207,11 +220,11 @@ export class Map extends Component {
         this.props.onClickMarker(marker.id);
       });
 
-      bounds.extend(marker.position);
+      this.bounds.extend(marker.position);
     });
-console.log()
-    this.map.fitBounds(bounds);
-    this.map.panToBounds(bounds);
+
+    this.map.fitBounds(this.bounds);
+    this.map.panToBounds(this.bounds);
   }
 
   // If google API has already been loaded, then loadMap
@@ -240,66 +253,78 @@ console.log()
   }
 
   showItemDetails() {
-    const selectedMarker = this.markers.filter(marker =>
-      marker.id === this.props.selectedItemId
-    );
+    if (this.props.selectedItemId !== '') {
 
-    selectedMarker[0].setAnimation(this.props.google.maps.Animation.BOUNCE);
+      const selectedMarker = this.markers.filter(marker =>
+        marker.id === this.props.selectedItemId
+      );
 
-    this.selectedMarker = selectedMarker[0]
+      selectedMarker[0].setAnimation(this.props.google.maps.Animation.BOUNCE);
 
-    setTimeout(() => {
-      this.selectedMarker.setAnimation(null)
-    }, 3000);
+      this.selectedMarker = selectedMarker[0]
 
-    const selectedItem = this.props.results.response.groups[0].items.filter(item =>
-      item.venue.id === this.props.selectedItemId
-    );
+      setTimeout(() => {
+        this.selectedMarker.setAnimation(null)
+      }, 10);
 
-/*    fetch('https://api.foursquare.com/v2/venues/'
-      + this.props.selectedItemId +
-      '?client_id=HPAOKFVI0WPGYVFGZW4QQVZTJPKCBCPWPQT3WULI3TKLTRUR' +
-      '&client_secret=NILFKLKATY20ZQU1Q2OZVMRRPYMONJMG4OQ144SHHIEXGAMJ&v=20180625')
-    .then(result => result.json())
-    .then(result => {
-      console.log(result);
-*/
+      const selectedItem = this.props.results.response.groups[0].items.filter(item =>
+        item.venue.id === this.props.selectedItemId
+      );
 
-    let result = {meta: {code: 300}};
-    this.placeInfoWindow.marker = selectedMarker[0];
-    this.placeInfoWindow.setContent(
-      '<div class="info-window">' +
-      '<h2>' +
-      selectedItem[0].venue.name +
-      '</h2>' +
+  /*    fetch('https://api.foursquare.com/v2/venues/'
+        + this.props.selectedItemId +
+        '?client_id=HPAOKFVI0WPGYVFGZW4QQVZTJPKCBCPWPQT3WULI3TKLTRUR' +
+        '&client_secret=NILFKLKATY20ZQU1Q2OZVMRRPYMONJMG4OQ144SHHIEXGAMJ&v=20180625')
+      .then(result => result.json())
+      .then(result => {
+        console.log(result);
+  */
 
-      (result.meta.code === 200 ?
-      '<img class="info-image" src="' +
-        result.response.venue.photos.groups[0].items[0].prefix  +
-        'cap100' +
-        result.response.venue.photos.groups[0].items[0].suffix +
-      '">' +
-      '<div class="info-tip">' +
-        result.response.venue.tips.groups[0].items[0].text +
-      '</div>'
-      : '') +
+      let result = {meta: {code: 300}};
+      this.placeInfoWindow.marker = selectedMarker[0];
+      this.placeInfoWindow.setContent(
+        '<div class="info-window">' +
+        '<h2>' +
+        selectedItem[0].venue.name +
+        '</h2>' +
 
-      (selectedItem[0].venue.location.address ?
-      '<div class=info-address>' +
-        selectedItem[0].venue.location.address +
-      '</div>'
-      : '') +
-      '</div>'
-    );
-    this.placeInfoWindow.open(this.map, selectedMarker[0]);
-/*    })
-    .catch(error => console.log(error));
-*/
+        (result.meta.code === 200 ?
+        '<img class="info-image" src="' +
+          result.response.venue.photos.groups[0].items[0].prefix  +
+          'cap100' +
+          result.response.venue.photos.groups[0].items[0].suffix +
+        '">' +
+        '<div class="info-tip">' +
+          result.response.venue.tips.groups[0].items[0].text +
+        '</div>'
+        : '') +
+
+        (selectedItem[0].venue.location.address ?
+        '<div class=info-address>' +
+          selectedItem[0].venue.location.address +
+        '</div>'
+        : '') +
+        '</div>'
+      );
+      this.placeInfoWindow.open(this.map, selectedMarker[0]);
+  /*    })
+      .catch(error => console.log(error));
+  */
+
+    } else {
+      this.placeInfoWindow.marker=null;
+      this.placeInfoWindow.close();
+    }
+
   }
 
   updateMarkers() {
+    if (this.placeInfoWindow.marker === this.selectedMarker) {
+            this.placeInfoWindow.marker=null;
+      this.placeInfoWindow.close();
+    }
     this.markers.forEach((marker, index) => {
-      if (this.props.results.response.groups[0].items[index].venue.categories[0].shortName !== this.props.selectedCategory) {
+      if (this.props.results.response.groups[0].items[index].venue.categories[0].shortName !== this.props.selectedCategory && this.props.selectedCategory !== 'All Places') {
         marker.setMap(null);
       } else {
         marker.setMap(this.map)

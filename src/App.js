@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import initialData from './initial-data.js';
 import MapContainer from'./MapContainer.js';
+import swal from 'sweetalert';
 
 class App extends Component {
   state = {
@@ -24,10 +25,9 @@ class App extends Component {
   componentDidMount() {
     document.getElementById('hide-list-button').addEventListener('click', this.togglePlaceList);
 
-        document.getElementById('place-filter').addEventListener('change', () => {
-         this.setState({selectedCategory: document.getElementById('place-filter').value});
-         console.log(this.state.selectedCategory)
-        });
+    document.getElementById('place-filter').addEventListener('change', () => {
+     this.setState({selectedCategory: document.getElementById('place-filter').value, selectedItemId: ''});
+    });
 
     document.querySelector('.place-list').addEventListener('click', e => this.onClickListItem(e));
   }
@@ -64,15 +64,22 @@ class App extends Component {
     .then(result => result.json())
     .then(result => {
       this.createCategories(result);
+      document.getElementById('place-filter').value = 'All Places'
       this.setState({
         results: result,
         neighborhhoodLocation: {
           lat: lat,
           lng: lng
-        }
+        },
+        selectedItemId: '',
+        selectedCategory: 'All Places'
       });
     })
-    .catch(error => console.log(error));
+    .catch(error =>
+      swal('Network error!', 'Please try later', {
+        className: "alert-window",
+      });
+    );
   }
 
   onClickMarker = (markerId) => {
