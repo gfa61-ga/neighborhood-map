@@ -7,18 +7,28 @@ export class Map extends Component {
   static propTypes = {
     google: PropTypes.object.isRequired,
     zoom: PropTypes.number.isRequired,
-    initialCenter: PropTypes.object.isRequired
-  }
+    initialCenter: PropTypes.object.isRequired,
+    onChangeNeighborhood: PropTypes.func.isRequired,
+    results: PropTypes.object.isRequired,
+    onClickMarker: PropTypes.func.isRequired,
+    selectedItemId: PropTypes.string.isRequired,
+    selectedCategory: PropTypes.string.isRequired
+  };
 
   markers = [];
-  selectedMarker ={}
+  selectedMarker ={};
   placeInfoWindow = {};
   bounds = {};
 
-  loadMap() {
+  // If google API has already been loaded, then loadMap
+  componentDidMount() {
+    this.loadMap();
+  }
+
+  loadMap = () => {
     // If google maps API is available
     if (this.props && this.props.google) {
-      let {initialCenter, zoom} = this.props;
+      let {initialCenter, zoom, google} = this.props;
 
       // https://snazzymaps.com/style/18/retro
       const myStyles = [
@@ -134,13 +144,13 @@ export class Map extends Component {
         clickableIcons: false,
         styles: myStyles,
         mapTypeControl: false
-      }
+      };
 
-      this.map = new this.props.google.maps.Map(document.getElementById('map-area'), mapConfig);
+      this.map = new google.maps.Map(document.getElementById('map-area'), mapConfig);
 
-      new this.props.google.maps.places.Autocomplete(document.getElementById('location-input'));
+      new google.maps.places.Autocomplete(document.getElementById('location-input'));
 
-      this.placeInfoWindow  = new this.props.google.maps.InfoWindow();
+      this.placeInfoWindow  = new google.maps.InfoWindow();
 
       this.placeInfoWindow.addListener('closeclick', () => {
         this.placeInfoWindow.marker = null;
@@ -148,20 +158,20 @@ export class Map extends Component {
       });
 
       let ref = this;
-      document.getElementById('location-button').addEventListener('click', (function() {
-        this.getNewLocation(ref);
-      }).bind(ref));
+      document.getElementById('location-button').addEventListener('click', () => {
+        this.getNewLocation(ref)
+      });
 
-      this.props.google.maps.event.addDomListener(window, "resize", () => {
-        this.props.google.maps.event.trigger(this.map, "resize");
+      google.maps.event.addDomListener(window, "resize", () => {
+        google.maps.event.trigger(this.map, "resize");
         this.map.fitBounds(this.bounds);
       });
 
-     this.createMarkers()
+     this.createMarkers();
     }
   }
 
-  getNewLocation(ref) {
+  getNewLocation = (ref) => {
     if (this.props.google) {
       console.log('go to location')
       let geocoder = new this.props.google.maps.Geocoder();
@@ -193,29 +203,30 @@ export class Map extends Component {
       }
     }
 
-  createMarkers() {
+  createMarkers =() => {
+    const google = this.props.google;
     this.markers.forEach(marker =>
       marker.setMap(null)
     );
     this.markers = [];
-    this.bounds = new this.props.google.maps.LatLngBounds();
+    this.bounds = new google.maps.LatLngBounds();
     this.props.results.response.groups[0].items.forEach(item => {
       const position = item.venue.location;
       const title = item.venue.location.name;
 
-      const markerImage = new this.props.google.maps.MarkerImage(
+      const markerImage = new google.maps.MarkerImage(
         'https://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|1f7bad|40|_|%E2%80%A2',
-        new this.props.google.maps.Size(21, 34),
-        new this.props.google.maps.Point(0, 0),
-        new this.props.google.maps.Point(10, 34),
-        new this.props.google.maps.Size(21,34)
+        new google.maps.Size(21, 34),
+        new google.maps.Point(0, 0),
+        new google.maps.Point(10, 34),
+        new google.maps.Size(21,34)
       );
 
-      const marker = new this.props.google.maps.Marker({
+      const marker = new google.maps.Marker({
         map: this.map,
         position: position,
         title: title,
-        animation: this.props.google.maps.Animation.DROP,
+        animation: google.maps.Animation.DROP,
         id: item.venue.id,
         icon: markerImage
       });
@@ -233,19 +244,15 @@ export class Map extends Component {
     this.map.panToBounds(this.bounds);
   }
 
-  // If google API has already been loaded, then loadMap
-  componentDidMount() {
-    this.loadMap();
-  }
-
-  // Else wait for the Map to be updated when Google Maps API will be asynchronously loaded and then loadMap
   componentDidUpdate(prevProps, prevState) {
+    //Load Map to be updated when Google Maps API will be asynchronously loaded
     if (prevProps.google !== this.props.google) {
       this.loadMap();
     }
     if (prevProps.initialCenter !== this.props.initialCenter) {
       this.map.panTo(this.props.initialCenter);
     }
+
     if (prevProps.results !== this.props.results) {
       this.createMarkers();
     }
@@ -258,16 +265,32 @@ export class Map extends Component {
     }
   }
 
-  showItemDetails() {
+  updateMarkers =() => {
+    if (this.placeInfoWindow.marker === this.selectedMarker) {
+      this.placeInfoWindow.marker=null;
+      this.placeInfoWindow.close();
+    }
+
+    this.markers.forEach((marker, index) => {
+      const markerCategory = this.props.results.response.groups[0].items[index].venue.categories[0].shortName;
+      if ( markerCategory !== this.props.selectedCategory && this.props.selectedCategory !== 'All Places') {
+        marker.setMap(null);
+      } else {
+        marker.setMap(this.map)
+      }
+    })
+  }
+
+  showItemDetails = ()=> {
     if (this.props.selectedItemId !== '') {
 
       const selectedMarker = this.markers.filter(marker =>
         marker.id === this.props.selectedItemId
-      );
+      )[0];
 
-      selectedMarker[0].setAnimation(this.props.google.maps.Animation.BOUNCE);
+      selectedMarker.setAnimation(this.props.google.maps.Animation.BOUNCE);
 
-      this.selectedMarker = selectedMarker[0]
+      this.selectedMarker = selectedMarker;
 
       setTimeout(() => {
         this.selectedMarker.setAnimation(null)
@@ -275,7 +298,7 @@ export class Map extends Component {
 
       const selectedItem = this.props.results.response.groups[0].items.filter(item =>
         item.venue.id === this.props.selectedItemId
-      );
+      )[0];
 
   /*    fetch('https://api.foursquare.com/v2/venues/'
         + this.props.selectedItemId +
@@ -287,61 +310,50 @@ export class Map extends Component {
   */
 
       let result = {meta: {code: 300}};
-      this.placeInfoWindow.marker = selectedMarker[0];
+      this.placeInfoWindow.marker = selectedMarker;
       this.placeInfoWindow.setContent(
         '<div class="info-window">' +
         '<h2>' +
-        selectedItem[0].venue.name +
+        selectedItem.venue.name +
         '</h2>' +
 
         (result.meta.code === 200 ?
-        '<img class="info-image" src="' +
-          result.response.venue.photos.groups[0].items[0].prefix  +
-          'cap100' +
-          result.response.venue.photos.groups[0].items[0].suffix +
-        '">' +
-        '<div class="info-tip">' +
-          result.response.venue.tips.groups[0].items[0].text +
-        '</div>'
-        : '') +
+          '<img class="info-image" src="' +
+            result.response.venue.photos.groups[0].items[0].prefix  +
+            'cap100' +
+            result.response.venue.photos.groups[0].items[0].suffix +
+          '">' +
+          '<div class="info-tip">' +
+            result.response.venue.tips.groups[0].items[0].text +
+          '</div>'
+        :
+          '') +
 
-        (selectedItem[0].venue.location.address ?
-        '<div class=info-address>' +
-          selectedItem[0].venue.location.address +
-        '</div>'
-        : '') +
+        (selectedItem.venue.location.address ?
+          '<div class=info-address>' +
+            selectedItem.venue.location.address +
+          '</div>'
+        :
+          '') +
+
         '</div>'
       );
-      this.placeInfoWindow.open(this.map, selectedMarker[0]);
+      this.placeInfoWindow.open(this.map, selectedMarker);
   /*    })
-      .catch(error => console.log(error));
+      .catch(error => console.log(Network Error. The infowindow will render only local data..));
   */
 
     } else {
-      this.placeInfoWindow.marker=null;
+      this.placeInfoWindow.marker = null;
       this.placeInfoWindow.close();
     }
 
-  }
-
-  updateMarkers() {
-    if (this.placeInfoWindow.marker === this.selectedMarker) {
-            this.placeInfoWindow.marker=null;
-      this.placeInfoWindow.close();
-    }
-    this.markers.forEach((marker, index) => {
-      if (this.props.results.response.groups[0].items[index].venue.categories[0].shortName !== this.props.selectedCategory && this.props.selectedCategory !== 'All Places') {
-        marker.setMap(null);
-      } else {
-        marker.setMap(this.map)
-      }
-    })
   }
 
   render() {
     return (
       <div className="map-message">
-        The map loads only when internet connection is available..!!
+        The map loads only when internet connection is available! Please Try to reload the page later..
       </div>
     );
   }

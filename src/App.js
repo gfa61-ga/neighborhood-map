@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import './App.css';
 import initialData from './initial-data.js';
-import MapContainer from'./MapContainer.js';
+import Map from'./Map.js';
+import PlaceList from'./PlaceList.js';
+import PlaceFilter from'./PlaceFilter.js';
+import { GoogleApiWrapper } from 'google-maps-react';
 import swal from 'sweetalert';
 
 class App extends Component {
@@ -22,24 +25,6 @@ class App extends Component {
     this.createCategories(this.state.results);
   }
 
-  componentDidMount() {
-    document.getElementById('hide-list-button').addEventListener('click', this.togglePlaceList);
-
-    document.getElementById('place-filter').addEventListener('change', () => {
-     this.setState({selectedCategory: document.getElementById('place-filter').value, selectedItemId: ''});
-    });
-
-    document.querySelector('.place-list').addEventListener('click', e => this.onClickListItem(e));
-  }
-
-  onClickListItem = (event) => {
-        this.setState({selectedItemId: event.target.id})
-  }
-
-  togglePlaceList() {
-    document.querySelector(".App").classList.toggle('hide-list');
-  }
-
   createCategories(results) {
     this.categories = [];
     this.categories = results.response.groups[0].items.map(item =>
@@ -55,7 +40,26 @@ class App extends Component {
     this.categories.unshift("All Places");
   }
 
-  onChangeNeighborhood = (lat,lng) => {
+  componentDidMount() {
+    document.getElementById('hide-list-button').addEventListener('click', this.togglePlaceList);
+  }
+
+  onPlaceFilter = () => {
+    this.setState({
+      selectedCategory: document.getElementById('place-filter').value,
+      selectedItemId: ''
+    });
+  }
+
+  onClickListItem = (event) => {
+    this.setState({selectedItemId: event.target.id})
+  }
+
+  togglePlaceList() {
+    document.querySelector(".App").classList.toggle('hide-list');
+  }
+
+  onChangeNeighborhood = (lat, lng) => {
     fetch('https://api.foursquare.com/v2/venues/explore?ll='
       + lat + ',' + lng +
       '&sortByDistance=1' +
@@ -64,7 +68,7 @@ class App extends Component {
     .then(result => result.json())
     .then(result => {
       this.createCategories(result);
-      document.getElementById('place-filter').value = 'All Places'
+      document.getElementById('place-filter').value = 'All Places';
       this.setState({
         results: result,
         neighborhhoodLocation: {
@@ -87,21 +91,17 @@ class App extends Component {
   }
 
   render() {
+    const state = this.state;
+
     return (
       <div className="App">
+
         <div className="input-area">
           <div className="search-places">
-            <select id="place-filter" aria-label="Places filter">
-              {
-                this.categories.map(category =>
-                  <option
-                    key={category}
-                    value={category}>
-                    {category}
-                  </option>
-                )
-              }
-            </select>
+            <PlaceFilter
+              onPlaceFilter={this.onPlaceFilter}
+              categories={this.categories}
+            />
           </div>
           <div className="neighborhood-location">
             <input id="location-input" type="text"
@@ -112,37 +112,25 @@ class App extends Component {
         </div>
 
         <div className="place-list">
-          <ul role="menu" aria-label="menu">
-              {
-                this.state.results.response.groups[0].items.filter(item => {
-                   return item.venue.categories[0].shortName === this.state.selectedCategory || this.state.selectedCategory === 'All Places'
-                 }
-                ).map(item =>
-                  <li
-                    key={item.venue.id}
-                    id={item.venue.id}
-                    role="menuitem"
-                    tabIndex="0"
-                    className={item.venue.id === this.state.selectedItemId ? 'selected' : ''}
-                    >
-                    {item.venue.name}
-                  </li>
-                )
-              }
-          </ul>
-       </div>
+          <PlaceList
+            items={state.results.response.groups[0].items}
+            onClickListItem={this.onClickListItem}
+            selectedItemId={state.selectedItemId}
+            selectedCategory={state.selectedCategory}
+          />
+        </div>
 
         <div className="list-footer"/>
         <div id="map-area">
-          <MapContainer
-            initialCenter={this.state.neighborhhoodLocation}
-            zoom={this.state.zoom}
+          <Map
+            google={this.props.google}
+            initialCenter={state.neighborhhoodLocation}
+            zoom={state.zoom}
             onChangeNeighborhood={this.onChangeNeighborhood}
-            results={this.state.results}
+            results={state.results}
             onClickMarker={this.onClickMarker}
-            selectedItemId={this.state.selectedItemId}
-            selectedCategory={this.state.selectedCategory}
-
+            selectedItemId={state.selectedItemId}
+            selectedCategory={state.selectedCategory}
           />
         </div>
       </div>
@@ -150,4 +138,9 @@ class App extends Component {
   }
 }
 
-export default App;
+// GoogleApiWrapper asynchronously loads the Google Maps API and passes is to the MapContainer as 'google' prop
+export default GoogleApiWrapper({
+  apiKey: 'AIzaSyDoF5xjAASOfupCeQwuTUrPYdRwrYvC6AI',
+  libraries: ['places']
+})(App);
+
