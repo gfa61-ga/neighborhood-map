@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-// https://sweetalert.js.org/
 import swal from 'sweetalert';
 
 export class Map extends Component {
@@ -15,22 +14,24 @@ export class Map extends Component {
     selectedCategory: PropTypes.string.isRequired
   };
 
+  // Set map variables
   markers = [];
-  selectedMarker ={};
+  selectedMarker = {};
   placeInfoWindow = {};
-  bounds = {};
+  markerBounds = {};
 
-  // If google API has already been loaded, then loadMap
+  // If google API has already been loaded, when the Map component is rendered, then loadMap
   componentDidMount() {
     this.loadMap();
   }
 
+  // Load map, create all the related elements and add listeners
   loadMap = () => {
     // If google maps API is available
     if (this.props && this.props.google) {
       let {initialCenter, zoom, google} = this.props;
 
-      // https://snazzymaps.com/style/18/retro
+      // Set map style using 'https://snazzymaps.com/style/18/retro' style
       const myStyles = [
         {
           featureType: 'administrative',
@@ -138,6 +139,7 @@ export class Map extends Component {
         }
       ];
 
+      // Set map options
       const mapConfig = {
         center: initialCenter,
         zoom: zoom,
@@ -146,57 +148,71 @@ export class Map extends Component {
         mapTypeControl: false
       };
 
+      // Load map
       this.map = new google.maps.Map(document.getElementById('map-area'), mapConfig);
 
+      // Create a google Autocomplete object and bind it with new neighborhood's location input-field
       new google.maps.places.Autocomplete(document.getElementById('location-input'));
 
+      this.createMarkers();
+
+      // Create only one infowindow that will be displayed on the selected marker, if any
       this.placeInfoWindow  = new google.maps.InfoWindow();
 
+      // When the info window is closed, hide it and unselect the marker it was displayed on
       this.placeInfoWindow.addListener('closeclick', () => {
         this.placeInfoWindow.marker = null;
+      // Use onClickMarker() method to clear the selected marker
         this.props.onClickMarker('');
       });
 
-      let ref = this;
-      document.getElementById('location-button').addEventListener('click', () => {
-        this.getNewLocation(ref)
-      });
+      // Add a listener to the 'Go to location' button
+      document.getElementById('location-button').addEventListener('click', this.getNewLocation );
 
+      // Properly zoom the map to display all markers when app's viewport is resized
       google.maps.event.addDomListener(window, "resize", () => {
         google.maps.event.trigger(this.map, "resize");
-        this.map.fitBounds(this.bounds);
+        this.map.fitBounds(this.markerBounds);
       });
-
-     this.createMarkers();
     }
   }
 
-  getNewLocation = (ref) => {
+  // Use google Geocoder to get the location of the neighborhood's new address
+  getNewLocation = () => {
+
+    // 'ref' is used below to bind the geocoder with this Map-component's onChangeNeighborhood prop
+    let ref = this;
     if (this.props.google) {
-      console.log('go to location')
+
+      // Create a Geocoder object
       let geocoder = new this.props.google.maps.Geocoder();
+
+      // Get the new neighborhood's address from the location input field
       let address = document.getElementById('location-input').value;
+
+      // Check that the address is valid
       if (address === '') {
         swal('You must enter an area, or address!', '!!!', {
           className: "alert-window",
         });
-      } else {
+      } else { // Give the address and a callBack function to the geocoder
         geocoder.geocode(
           { address: address
-          }, function(results, status) {
-            if (status === 'OK') {
+          }, function(results, status) { // This function is asynchronously called when the geocoder gets the results
+            if (status === 'OK') { // If the address is found get its location
               let newLat = results[0].geometry.location.lat();
               let newLng = results[0].geometry.location.lng();
 
+              // Call the onChangeNeighborhood() prop of the Map container, passing the new location
               ref.props.onChangeNeighborhood(newLat, newLng);
-            } else {
+            } else { // If the address is not found, alert the user and do nothing
               swal('We could not find that location!', 'Try entering a more specific place.',  {
                 className: "alert-window",
               });
             }
           });
         }
-      } else {
+      } else { // If google maps API is not loaded, alert the user when he clicks on 'Go to location' button
         swal('There is no network connection!', 'Please try later..',  {
           className: "alert-window",
         });
@@ -205,15 +221,25 @@ export class Map extends Component {
 
   createMarkers =() => {
     const google = this.props.google;
+
+    // Clear previous markers
     this.markers.forEach(marker =>
       marker.setMap(null)
     );
     this.markers = [];
-    this.bounds = new google.maps.LatLngBounds();
-    this.props.results.response.groups[0].items.forEach(item => {
-      const position = item.venue.location;
-      const title = item.venue.location.name;
 
+    // Create markerBounds
+    this.markerBounds = new google.maps.LatLngBounds();
+
+    // Get places from fourSquare fetch results
+    const places = this.props.results.response.groups[0].items;
+
+    // Create a marker for each place
+    places.forEach(place => {
+      const position = place.venue.location; // Get place position
+      const title = place.venue.location.name; // Get place title
+
+      // Get marker icon with #E280A2 color
       const markerImage = new google.maps.MarkerImage(
         'https://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|1f7bad|40|_|%E2%80%A2',
         new google.maps.Size(21, 34),
@@ -222,67 +248,90 @@ export class Map extends Component {
         new google.maps.Size(21,34)
       );
 
+      // create an animated marker
       const marker = new google.maps.Marker({
         map: this.map,
         position: position,
         title: title,
         animation: google.maps.Animation.DROP,
-        id: item.venue.id,
+        id: place.venue.id,
         icon: markerImage
       });
 
+      // Add the marker to the markers array
       this.markers.push(marker);
 
+      // Add a listener to the marker, to display an infoWindow when the marker is clicked
       marker.addListener('click', event => {
         this.props.onClickMarker(marker.id);
       });
 
-      this.bounds.extend(marker.position);
+      // Update markerBounds with new marker's position
+      this.markerBounds.extend(marker.position);
     });
 
-    this.map.fitBounds(this.bounds);
-    this.map.panToBounds(this.bounds);
+    // When all markers are created fit and pan the map to markerBounds
+    this.map.fitBounds(this.markerBounds);
+    this.map.panToBounds(this.markerBounds);
   }
 
+  // When a map prop is updated handle it
   componentDidUpdate(prevProps, prevState) {
-    //Load Map to be updated when Google Maps API will be asynchronously loaded
+    /* If the map was not loaded when this map component rendered, then, when the 'google' prop is updated,
+     * indicating that the Google Maps API is asynchronously loaded, load the map
+     */
     if (prevProps.google !== this.props.google) {
       this.loadMap();
     }
+
+    // Update map center when we go to a new neighborhood
     if (prevProps.initialCenter !== this.props.initialCenter) {
       this.map.panTo(this.props.initialCenter);
     }
 
+    // Create markers for the new neighborhood
     if (prevProps.results !== this.props.results) {
       this.createMarkers();
     }
 
+    // If place category is changed update the markers, so that only the markers of the newly selected Category are displayed
     if (prevProps.selectedCategory !== this.props.selectedCategory) {
       this.updateMarkers();
     }
+
+    // Show item details for the new selected item
     if (prevProps.selectedItemId !== this.props.selectedItemId) {
       this.showItemDetails();
     }
   }
 
-  updateMarkers =() => {
-    if (this.placeInfoWindow.marker === this.selectedMarker) {
-      this.placeInfoWindow.marker=null;
-      this.placeInfoWindow.close();
-    }
+  // Update markers, so that only the markers of the newly selected Category are displayed
+  updateMarkers = () => {
+    // in case it is opended, hide the infoWindow,
+    this.placeInfoWindow.marker = null;
+    this.placeInfoWindow.close();
 
     this.markers.forEach((marker, index) => {
-      const markerCategory = this.props.results.response.groups[0].items[index].venue.categories[0].shortName;
-      if ( markerCategory !== this.props.selectedCategory && this.props.selectedCategory !== 'All Places') {
-        marker.setMap(null);
+      // Get place with same index as the marker
+      const place = this.props.results.response.groups[0].items[index];
+
+      // Get marker's category from its associated place
+      const markerCategory = place.venue.categories[0].shortName;
+
+      if ( markerCategory === this.props.selectedCategory || this.props.selectedCategory === 'All Places') {
+        marker.setMap(this.map) // Show marker
       } else {
-        marker.setMap(this.map)
+        marker.setMap(null); // Hide marker
       }
     })
   }
 
+  // Get Display marker details in an infowindow,
   showItemDetails = ()=> {
     if (this.props.selectedItemId !== '') {
+
+      this.placeInfoWindow.marker = null;
+      this.placeInfoWindow.close();
 
       const selectedMarker = this.markers.filter(marker =>
         marker.id === this.props.selectedItemId
@@ -300,14 +349,14 @@ export class Map extends Component {
         item.venue.id === this.props.selectedItemId
       )[0];
 
-  /*    fetch('https://api.foursquare.com/v2/venues/'
+/*
+      fetch('https://api.foursquare.com/v2/venues/'
         + this.props.selectedItemId +
         '?client_id=HPAOKFVI0WPGYVFGZW4QQVZTJPKCBCPWPQT3WULI3TKLTRUR' +
         '&client_secret=NILFKLKATY20ZQU1Q2OZVMRRPYMONJMG4OQ144SHHIEXGAMJ&v=20180625')
       .then(result => result.json())
       .then(result => {
-        console.log(result);
-  */
+*/
 
       let result = {meta: {code: 300}};
       this.placeInfoWindow.marker = selectedMarker;
@@ -318,31 +367,45 @@ export class Map extends Component {
         '</h2>' +
 
         (result.meta.code === 200 ?
-          '<img class="info-image" src="' +
+          (result.response.venue.photos.groups[0].items[0] ?
+            '<img class="info-image" alt="place-image" src="' +
             result.response.venue.photos.groups[0].items[0].prefix  +
             'cap100' +
             result.response.venue.photos.groups[0].items[0].suffix +
-          '">' +
-          '<div class="info-tip">' +
-            result.response.venue.tips.groups[0].items[0].text +
-          '</div>'
+            '">'
+          :
+            ''
+          ) +
+          (result.response.venue.tips.groups[0].items[0].text ?
+            '<div class="info-tip">' +
+              result.response.venue.tips.groups[0].items[0].text +
+            '</div>'
+          :
+            ''
+          )
         :
-          '') +
+          ''
+        ) +
 
         (selectedItem.venue.location.address ?
           '<div class=info-address>' +
             selectedItem.venue.location.address +
           '</div>'
         :
-          '') +
+          ''
+        ) +
 
         '</div>'
       );
-      this.placeInfoWindow.open(this.map, selectedMarker);
-  /*    })
-      .catch(error => console.log(Network Error. The infowindow will render only local data..));
-  */
 
+      setTimeout(() => {
+        this.placeInfoWindow.open(this.map, selectedMarker);
+      }, 400);
+
+/*
+      })
+      .catch(error => console.log('Network Error. The infowindow will render only local data..'));
+*/
     } else {
       this.placeInfoWindow.marker = null;
       this.placeInfoWindow.close();

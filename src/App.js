@@ -5,8 +5,13 @@ import Map from'./Map.js';
 import PlaceList from'./PlaceList.js';
 import PlaceFilter from'./PlaceFilter.js';
 import { GoogleApiWrapper } from 'google-maps-react';
+
+/* get the SweetAlert library to make popup messages
+ * More details at: https://sweetalert.js.org/
+ */
 import swal from 'sweetalert';
 
+// initialData and neighborhhoodLocation for Pl. Ipsilon Alonion, Patras, Greece
 class App extends Component {
   state = {
     neighborhhoodLocation: {
@@ -19,31 +24,42 @@ class App extends Component {
     selectedCategory: 'All Places'
   };
 
+  // The categories we use to filter places
   categories = [];
 
+  // Create categories before rendering the App
   componentWillMount() {
     this.createCategories(this.state.results);
   }
 
+  // Create categories using results from a fourSquare 'Get Venue Recommendations' response which contains 30 place items
   createCategories(results) {
+    // Clear previous categories if any
     this.categories = [];
+
+    // Get caterory names
     this.categories = results.response.groups[0].items.map(item =>
       item.venue.categories[0].shortName
     );
 
+    // Sort category names alphabetically
     this.categories.sort();
 
+    // Remove duplicates
     this.categories = this.categories.filter((category, index, array) =>
       category !== array[index+1]
     );
 
+    // Add "All Places" at the beginning of categories array
     this.categories.unshift("All Places");
   }
 
+  // When the App is rendered add a click listener to the 'hide-list-button'
   componentDidMount() {
     document.getElementById('hide-list-button').addEventListener('click', this.togglePlaceList);
   }
 
+  // When a new category is selected update state and clear selectedItem
   onPlaceFilter = () => {
     this.setState({
       selectedCategory: document.getElementById('place-filter').value,
@@ -51,14 +67,19 @@ class App extends Component {
     });
   }
 
+  // When a new place is selected in place list, update state
   onClickListItem = (event) => {
     this.setState({selectedItemId: event.target.id})
   }
 
+  // When the 'hide-list-button' is press toggle (show / hide) the place list using CSS
   togglePlaceList() {
     document.querySelector(".App").classList.toggle('hide-list');
   }
 
+  /* When the 'Go to location' button is pressed, get the new neighborhoods lat and lng,
+   * make a fetch request to FourSquare API and update the state using the response data
+   */
   onChangeNeighborhood = (lat, lng) => {
     fetch('https://api.foursquare.com/v2/venues/explore?ll='
       + lat + ',' + lng +
@@ -67,8 +88,13 @@ class App extends Component {
       '&client_secret=NILFKLKATY20ZQU1Q2OZVMRRPYMONJMG4OQ144SHHIEXGAMJ&v=20180625')
     .then(result => result.json())
     .then(result => {
+      // Create the categories of the new places
       this.createCategories(result);
+
+      // Reset the value of 'place-filter' <select> element
       document.getElementById('place-filter').value = 'All Places';
+
+      // Update state
       this.setState({
         results: result,
         neighborhhoodLocation: {
@@ -86,6 +112,7 @@ class App extends Component {
     );
   }
 
+  // When a marker is clicked update state
   onClickMarker = (markerId) => {
     this.setState({selectedItemId: markerId})
   }
@@ -138,7 +165,7 @@ class App extends Component {
   }
 }
 
-// GoogleApiWrapper asynchronously loads the Google Maps API and passes is to the MapContainer as 'google' prop
+// USe GoogleApiWrapper to asynchronously load the Google Maps API and pass is to the App as 'google' prop
 export default GoogleApiWrapper({
   apiKey: 'AIzaSyDoF5xjAASOfupCeQwuTUrPYdRwrYvC6AI',
   libraries: ['places']

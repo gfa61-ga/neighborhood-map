@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 export class PlaceList extends Component {
   static propTypes = {
-    items: PropTypes.object.isRequired,
+    items: PropTypes.array.isRequired,
     onClickListItem: PropTypes.func.isRequired,
     selectedItemId: PropTypes.string.isRequired,
     selectedCategory: PropTypes.string.isRequired

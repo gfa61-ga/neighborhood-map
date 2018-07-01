@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 
 export class PlaceFilter extends Component {
   static propTypes = {
-    selectedItemId: PropTypes.string.isRequired,
-    selectedCategory: PropTypes.string.isRequired
+    selectedItemId: PropTypes.string,
+    selectedCategory: PropTypes.string
   };
 
   componentDidMount() {
