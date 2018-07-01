@@ -152,50 +152,56 @@ export class Map extends Component {
         this.getNewLocation(ref);
       }).bind(ref));
 
-
       this.props.google.maps.event.addDomListener(window, "resize", () => {
         this.props.google.maps.event.trigger(this.map, "resize");
         this.map.fitBounds(this.bounds);
       });
-
-
 
      this.createMarkers()
     }
   }
 
   getNewLocation(ref) {
-    let geocoder = new this.props.google.maps.Geocoder();
-    let address = document.getElementById('location-input').value;
-    if (address === '') {
-      swal('You must enter an area, or address!', '!!!', {
-        className: "alert-window",
-      });
-    } else {
-      geocoder.geocode(
-        { address: address
-        }, function(results, status) {
-          if (status === 'OK') {
-            let newLat = results[0].geometry.location.lat();
-            let newLng = results[0].geometry.location.lng();
+    if (this.props.google) {
+      console.log('go to location')
+      let geocoder = new this.props.google.maps.Geocoder();
+      let address = document.getElementById('location-input').value;
+      if (address === '') {
+        swal('You must enter an area, or address!', '!!!', {
+          className: "alert-window",
+        });
+      } else {
+        geocoder.geocode(
+          { address: address
+          }, function(results, status) {
+            if (status === 'OK') {
+              let newLat = results[0].geometry.location.lat();
+              let newLng = results[0].geometry.location.lng();
 
-            ref.props.onChangeNeighborhood(newLat, newLng);
-          } else {
-            swal('We could not find that location!', 'Try entering a more specific place.',  {
-              className: "alert-window",
-            });
-          }
+              ref.props.onChangeNeighborhood(newLat, newLng);
+            } else {
+              swal('We could not find that location!', 'Try entering a more specific place.',  {
+                className: "alert-window",
+              });
+            }
+          });
+        }
+      } else {
+        swal('There is no network connection!', 'Please try later..',  {
+          className: "alert-window",
         });
       }
     }
 
   createMarkers() {
+    this.markers.forEach(marker =>
+      marker.setMap(null)
+    );
     this.markers = [];
     this.bounds = new this.props.google.maps.LatLngBounds();
     this.props.results.response.groups[0].items.forEach(item => {
       const position = item.venue.location;
       const title = item.venue.location.name;
-
 
       const markerImage = new this.props.google.maps.MarkerImage(
         'https://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|1f7bad|40|_|%E2%80%A2',
@@ -334,8 +340,8 @@ export class Map extends Component {
 
   render() {
     return (
-      <div>
-        Loading map..
+      <div className="map-message">
+        The map loads only when internet connection is available..!!
       </div>
     );
   }

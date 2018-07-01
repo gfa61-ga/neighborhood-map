@@ -78,7 +78,7 @@ class App extends Component {
     .catch(error =>
       swal('Network error!', 'Please try later', {
         className: "alert-window",
-      });
+      })
     );
   }
 
