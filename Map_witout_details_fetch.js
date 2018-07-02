@@ -358,7 +358,7 @@ export class Map extends Component {
        * The Foursquare API has ****** a limit of 50 ******** API Calls per day for place details
        * More information on: https://developer.foursquare.com/docs/api/troubleshooting/rate-limits
        */
-      fetch('https://api.foursquare.com/v2/venues/'
+/*    fetch('https://api.foursquare.com/v2/venues/'
         + this.props.selectedItemId +
         '?client_id=HPAOKFVI0WPGYVFGZW4QQVZTJPKCBCPWPQT3WULI3TKLTRUR' +
         '&client_secret=NILFKLKATY20ZQU1Q2OZVMRRPYMONJMG4OQ144SHHIEXGAMJ&v=20180625')
@@ -367,6 +367,12 @@ export class Map extends Component {
       // Get place's photo and tip from the responce
       const placePhoto = result.response.venue.photos.groups[0].items[0];
       const placeTip = result.response.venue.tips.groups[0].items[0]
+*/
+
+      let result = {meta: {code: 300}};
+      const placePhoto = undefined;
+      const placeTip = undefined;
+
 
       this.placeInfoWindow.marker = selectedMarker;
 
@@ -413,10 +419,13 @@ export class Map extends Component {
       setTimeout(() => {
         this.placeInfoWindow.open(this.map, selectedMarker);
       }, 400);
+
+/*
       })
       .catch(error =>
         console.log('Network Error. The infowindow will render only local data..')
       );
+*/
     } else { // If the previously selected place is now unselected, close the infowindow
       this.placeInfoWindow.marker = null;
       this.placeInfoWindow.close();

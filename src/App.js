@@ -1,3 +1,6 @@
+/* This app displays the map and a list of up to 30 places, provided by the FourSquare Places API
+ * The categories and ids provided by this API are used to filter and uniquely identify these places
+ */
 import React, { Component } from 'react';
 import './App.css';
 import initialData from './initial-data.js';
