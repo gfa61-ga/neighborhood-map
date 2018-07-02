@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import './App.css';
 import initialData from './initial-data.js';
-import Map from'./Map.js';
+import MapContainer from'./MapContainer.js';
 import PlaceList from'./PlaceList.js';
 import PlaceFilter from'./PlaceFilter.js';
-import { GoogleApiWrapper } from 'google-maps-react';
 
 /* get the SweetAlert library to make popup messages
  * More details at: https://sweetalert.js.org/
@@ -149,7 +148,7 @@ class App extends Component {
 
         <div className="list-footer"/>
         <div id="map-area">
-          <Map
+          <MapContainer
             google={this.props.google}
             initialCenter={state.neighborhhoodLocation}
             zoom={state.zoom}
@@ -165,9 +164,4 @@ class App extends Component {
   }
 }
 
-// USe GoogleApiWrapper to asynchronously load the Google Maps API and pass is to the App as 'google' prop
-export default GoogleApiWrapper({
-  apiKey: 'AIzaSyDoF5xjAASOfupCeQwuTUrPYdRwrYvC6AI',
-  libraries: ['places']
-})(App);
-
+export default App;

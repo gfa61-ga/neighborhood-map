@@ -28,7 +28,7 @@ export class Map extends Component {
   // Load map, create all the related elements and add listeners
   loadMap = () => {
     // If google maps API is available
-    if (this.props && this.props.google) {
+    if (this.props.google) {
       let {initialCenter, zoom, google} = this.props;
 
       // Set map style using 'https://snazzymaps.com/style/18/retro' style
@@ -179,9 +179,6 @@ export class Map extends Component {
 
   // Use google Geocoder to get the location of the neighborhood's new address
   getNewLocation = () => {
-
-    // 'ref' is used below to bind the geocoder with this Map-component's onChangeNeighborhood prop
-    let ref = this;
     if (this.props.google) {
 
       // Create a Geocoder object
@@ -198,13 +195,13 @@ export class Map extends Component {
       } else { // Give the address and a callBack function to the geocoder
         geocoder.geocode(
           { address: address
-          }, function(results, status) { // This function is asynchronously called when the geocoder gets the results
+          }, (results, status) => { // This function is asynchronously called when the geocoder gets the results
             if (status === 'OK') { // If the address is found get its location
               let newLat = results[0].geometry.location.lat();
               let newLng = results[0].geometry.location.lng();
 
               // Call the onChangeNeighborhood() prop of the Map container, passing the new location
-              ref.props.onChangeNeighborhood(newLat, newLng);
+              this.props.onChangeNeighborhood(newLat, newLng);
             } else { // If the address is not found, alert the user and do nothing
               swal('We could not find that location!', 'Try entering a more specific place.',  {
                 className: "alert-window",
@@ -326,8 +323,8 @@ export class Map extends Component {
     })
   }
 
-  // Get Display marker details in an infowindow,
-  showItemDetails = ()=> {
+  // Swow selected marker's details in an infowindow
+  showItemDetails = () => {
     if (this.props.selectedItemId !== '') {
 
       this.placeInfoWindow.marker = null;
@@ -359,6 +356,10 @@ export class Map extends Component {
 */
 
       let result = {meta: {code: 300}};
+
+      const placePhoto = result.response.venue.photos.groups[0].items[0];
+      const placeTip = result.response.venue.tips.groups[0].items[0]
+
       this.placeInfoWindow.marker = selectedMarker;
       this.placeInfoWindow.setContent(
         '<div class="info-window">' +
@@ -367,18 +368,18 @@ export class Map extends Component {
         '</h2>' +
 
         (result.meta.code === 200 ?
-          (result.response.venue.photos.groups[0].items[0] ?
+          (placePhoto ?
             '<img class="info-image" alt="place-image" src="' +
-            result.response.venue.photos.groups[0].items[0].prefix  +
+            placePhoto.prefix  +
             'cap100' +
-            result.response.venue.photos.groups[0].items[0].suffix +
+            placePhoto.suffix +
             '">'
           :
             ''
           ) +
-          (result.response.venue.tips.groups[0].items[0].text ?
+          (placeTip.text ?
             '<div class="info-tip">' +
-              result.response.venue.tips.groups[0].items[0].text +
+              placeTip.text +
             '</div>'
           :
             ''
