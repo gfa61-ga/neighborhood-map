@@ -304,12 +304,14 @@ export class Map extends Component {
 
   // Update markers, so that only the markers of the newly selected Category are displayed
   updateMarkers = () => {
-    // in case it is opended, hide the infoWindow,
+    // In case it is opended, hide the infoWindow,
     this.placeInfoWindow.marker = null;
     this.placeInfoWindow.close();
 
     this.markers.forEach((marker, index) => {
-      // Get place with same index as the marker
+      /* Get place with same index as the marker, since we have one marker for each place
+       * and each item of an associated place/marker pair has the same 'index' value
+       */
       const place = this.props.results.response.groups[0].items[index];
 
       // Get marker's category from its associated place
@@ -323,53 +325,67 @@ export class Map extends Component {
     })
   }
 
-  // Swow selected marker's details in an infowindow
+  // Animate the marker for the selected place and show place's details in an infowindow
   showItemDetails = () => {
+    // If there is a selected item
     if (this.props.selectedItemId !== '') {
 
+      // In case it is opended, hide the infoWindow,
       this.placeInfoWindow.marker = null;
       this.placeInfoWindow.close();
 
+      /* Get the marker with same id as the selected place, since
+       * each item of an associated place/marker pair has the same 'id' value
+       */
       const selectedMarker = this.markers.filter(marker =>
         marker.id === this.props.selectedItemId
       )[0];
-
-      selectedMarker.setAnimation(this.props.google.maps.Animation.BOUNCE);
-
       this.selectedMarker = selectedMarker;
 
+      // Shortly animate the marker
+      selectedMarker.setAnimation(this.props.google.maps.Animation.BOUNCE);
       setTimeout(() => {
         this.selectedMarker.setAnimation(null)
       }, 10);
 
-      const selectedItem = this.props.results.response.groups[0].items.filter(item =>
+      // Get selected place's general information from FourSquare API general info
+      const selectedPlace = this.props.results.response.groups[0].items.filter(item =>
         item.venue.id === this.props.selectedItemId
       )[0];
 
-/*
-      fetch('https://api.foursquare.com/v2/venues/'
+
+      /* Make a new fetch request to FourSquare API to get place's details and from these details use 'photo' and 'tip'
+       * The Foursquare API has ****** a limit of 50 ******** API Calls per day for place details
+       * More information on: https://developer.foursquare.com/docs/api/troubleshooting/rate-limits
+       */
+/*    fetch('https://api.foursquare.com/v2/venues/'
         + this.props.selectedItemId +
         '?client_id=HPAOKFVI0WPGYVFGZW4QQVZTJPKCBCPWPQT3WULI3TKLTRUR' +
         '&client_secret=NILFKLKATY20ZQU1Q2OZVMRRPYMONJMG4OQ144SHHIEXGAMJ&v=20180625')
       .then(result => result.json())
       .then(result => {
+      // Get place's photo and tip from the responce
+      const placePhoto = result.response.venue.photos.groups[0].items[0];
+      const placeTip = result.response.venue.tips.groups[0].items[0]
 */
 
       let result = {meta: {code: 300}};
+      const placePhoto = undefined;
+      const placeTip = undefined;
 
-      const placePhoto = result.response.venue.photos.groups[0].items[0];
-      const placeTip = result.response.venue.tips.groups[0].items[0]
 
       this.placeInfoWindow.marker = selectedMarker;
+
+      // Create infowindow content using place's general info and details
       this.placeInfoWindow.setContent(
         '<div class="info-window">' +
         '<h2>' +
-        selectedItem.venue.name +
+        selectedPlace.venue.name +  // Place name
         '</h2>' +
 
-        (result.meta.code === 200 ?
+        (result.meta.code === 200 ? // If the user is in the 50 API Calls limit per day for place details
           (placePhoto ?
-            '<img class="info-image" alt="place-image" src="' +
+            '<img class="info-image" alt="place-image" src="' +  // Place photo url
             placePhoto.prefix  +
             'cap100' +
             placePhoto.suffix +
@@ -378,7 +394,7 @@ export class Map extends Component {
             ''
           ) +
           (placeTip.text ?
-            '<div class="info-tip">' +
+            '<div class="info-tip">' +  // Place tip
               placeTip.text +
             '</div>'
           :
@@ -388,9 +404,9 @@ export class Map extends Component {
           ''
         ) +
 
-        (selectedItem.venue.location.address ?
+        (selectedPlace.venue.location.address ?
           '<div class=info-address>' +
-            selectedItem.venue.location.address +
+            selectedPlace.venue.location.address +  // Place address
           '</div>'
         :
           ''
@@ -399,15 +415,18 @@ export class Map extends Component {
         '</div>'
       );
 
+      // Show the infowindow when marker's animation ends
       setTimeout(() => {
         this.placeInfoWindow.open(this.map, selectedMarker);
       }, 400);
 
 /*
       })
-      .catch(error => console.log('Network Error. The infowindow will render only local data..'));
+      .catch(error =>
+        console.log('Network Error. The infowindow will render only local data..')
+      );
 */
-    } else {
+    } else { // If the previously selected place is now unselected, close the infowindow
       this.placeInfoWindow.marker = null;
       this.placeInfoWindow.close();
     }

@@ -18,8 +18,8 @@ class App extends Component {
       lng: 21.7349910736084
     },
     zoom: 17,
-    results: initialData,
-    selectedItemId: '',
+    results: initialData,  // General information from 30 places recommended by fourSquare
+    selectedItemId: '', // '' indicates that there is no place selected
     selectedCategory: 'All Places'
   };
 
