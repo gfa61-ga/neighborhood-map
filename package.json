@@ -20,5 +20,6 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "eject": "react-scripts eject"
-  }
+  },
+  "homepage": "https://gfa61-ga.github.io/neighborhood-map"
 }

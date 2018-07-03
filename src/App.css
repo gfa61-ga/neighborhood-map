@@ -211,20 +211,26 @@ body {
   border-width: 0 0 1px;
   text-align: center;
   width: 100%;
+  margin: 3px 0;
 }
 
 .info-window .info-image {
   grid-column: 1 ;
   grid-row: 2;
+  align-self: stretch;
 }
 
 .info-window .info-tip {
-  font-size: 0.7em;
+  font-size: 0.8em;
   grid-column: 2 ;
   grid-row: 2;
   border: 1px solid #ecf9ea;
   border-width: 0 1px;
   text-align: center;
+  background-color: #e6e6e6;
+  align-self: stretch;
+  display: grid;
+  align-items: center;
 }
 
 .info-window .info-address {
@@ -235,8 +241,12 @@ body {
   border: 1px solid #ecf9ea;
   border-width: 1px 0 0;
   text-align: center;
+  background-color: #b4cac4;
+  width: 100%;
+  margin: 3px 0;
 }
 
 .alert-window {
   background-color: #b7d3e2;
 }
+

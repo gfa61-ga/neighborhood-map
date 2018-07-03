@@ -4,6 +4,7 @@ This ([demo version here](https://gfa61-ga.github.io/neighborhood-map/)) is a si
 
 ## Installation and Run
 
+To run the app in production mode:
 1. Clone this GitHub repository.
 2. Go in the repository folder
 3. Install all project dependencies with `npm install`
@@ -12,22 +13,32 @@ This ([demo version here](https://gfa61-ga.github.io/neighborhood-map/)) is a si
 
 ## Offline-First Considerations
 
-If you need to test your offline-first service worker locally:
-1. Build the application with `npm run build`
-2. Run a simple http server from your build application with `serve -s build`
-3. With your server running, visit the app in your browser at: `http://localhost:5000/`
+If you need run a build version of the app, in order to test your offline-first service worker locally:
+1. Remove the "homepage" line from package.json file, if any
+2. Build the application with `npm run build`
+3. Run a simple http server from your build application with `serve -s build`
+4. With your server running, visit the app in your browser at: `http://localhost:5000/`
+
+## Github pages deployment
+
+To deploy the app on gitHub pages:
+1. Add `"homepage": "https://gfa61-ga.github.io/neighborhood-map"` in package.json file
+2. Deploy the app with `npm run deploy`
 
 ## App Functionality
+
 The app initially displays:
 * the **map** of “Pl. Ipsilon Alonion, Patras, Greece” neighborhood
-* a list of up to **30 recommended places** for this neighborhood, provided by the _FourSquare Places API_ and
+* a list of up to **50 recommended places** for the neighborhood, provided by the _FourSquare Places API_ and
 * **markers** on the map for these places
+* **if Geolocation** is available the App will **try to locate user's current location** and **almost instantly will update** the neighborhood
 
 The user
 1. Can **choose a place filter** from the top left drop down menu and then **places** in the list and their  markers **update** accordingly.
 2. Can **select a place** from the  place list or a marker from the map and then an info window **is shown** with the **title, photo, short user review and address** of this place. (Due to Foursquare API  [limit]( https://developer.foursquare.com/docs/api/troubleshooting/rate-limits) of 50 API Calls per day for place photo and short user review (tip), when the user exceeds this daily limit, only the title and addres of selected places will be displayed for the rest of this day)
 3. Can **write the address of a new neighborhood** he wants to visit and **press the `Go` button** and then the map and the recommended places are updated for this new neighborhood
 4. Can press the top left button to **toggle the visibility of the place list**.
+5. If Geolocation is available, can **reload** the App, **when he moves** to another neighborhood, **to get updated information**.
 
 ## License
 This code is distributed under the [MIT license](https://opensource.org/licenses/MIT).

@@ -20,6 +20,30 @@ export class Map extends Component {
   placeInfoWindow = {};
   markerBounds = {};
 
+  // Before the map loads try to get user's current location and update Apps initialCenter state
+  componentWillMount() {
+    if (navigator.geolocation) { // If geolocation is available
+      navigator.geolocation.getCurrentPosition((position) => { // Get current position
+        let currentLat = position.coords.latitude;
+        let currentLng = position.coords.longitude;
+
+        // Get current position's formated address
+        let geocoder = new this.props.google.maps.Geocoder();
+        geocoder.geocode({'location': {lat: currentLat, lng: currentLng}}, (results, status) => {
+          if (status === 'OK') {
+            if (results[0]) { // If address is found
+              // Update App's input field with the current address
+              document.getElementById('location-input').value = results[0].formatted_address;
+
+              // Call onChangeNeighborhood() to uodate Apps initialCenter stateUpddate and update the map and places
+              this.props.onChangeNeighborhood(currentLat, currentLng);
+            }
+          }
+        })
+      }
+    )}
+  }
+
   // If google API has already been loaded, when the Map component is rendered, then loadMap
   componentDidMount() {
     this.loadMap();
@@ -267,9 +291,8 @@ export class Map extends Component {
       this.markerBounds.extend(marker.position);
     });
 
-    // When all markers are created fit and pan the map to markerBounds
-    this.map.fitBounds(this.markerBounds);
-    this.map.panToBounds(this.markerBounds);
+    // When all markers are created fit the map to markerBounds
+    this.map.fitBounds(this.markerBounds); // Autocenter
   }
 
   // When a map prop is updated handle it
@@ -278,7 +301,7 @@ export class Map extends Component {
      * indicating that the Google Maps API is asynchronously loaded, load the map
      */
     if (prevProps.google !== this.props.google) {
-      this.loadMap();
+        this.loadMap();
     }
 
     // Update map center when we go to a new neighborhood
@@ -308,6 +331,9 @@ export class Map extends Component {
     this.placeInfoWindow.marker = null;
     this.placeInfoWindow.close();
 
+    // Clear bounds
+    let markerBounds = new this.props.google.maps.LatLngBounds();
+
     this.markers.forEach((marker, index) => {
       /* Get place with same index as the marker, since we have one marker for each place
        * and each item of an associated place/marker pair has the same 'index' value
@@ -319,10 +345,14 @@ export class Map extends Component {
 
       if ( markerCategory === this.props.selectedCategory || this.props.selectedCategory === 'All Places') {
         marker.setMap(this.map) // Show marker
+        markerBounds.extend(marker.position); // Add marker to bounds
       } else {
         marker.setMap(null); // Hide marker
       }
     })
+
+    markerBounds.extend(this.props.initialCenter); // Include neighborhood center to bounds
+    this.map.fitBounds(markerBounds); // Center map to bounts
   }
 
   // Animate the marker for the selected place and show place's details in an infowindow
@@ -353,7 +383,6 @@ export class Map extends Component {
         item.venue.id === this.props.selectedItemId
       )[0];
 
-
       /* Make a new fetch request to FourSquare API to get place's details and from these details use 'photo' and 'tip'
        * The Foursquare API has ****** a limit of 50 ******** API Calls per day for place details
        * More information on: https://developer.foursquare.com/docs/api/troubleshooting/rate-limits
@@ -365,8 +394,8 @@ export class Map extends Component {
       .then(result => result.json())
       .then(result => {
       // Get place's photo and tip from the responce
-      const placePhoto = result.response.venue.photos.groups[0].items[0];
-      const placeTip = result.response.venue.tips.groups[0].items[0]
+      const placePhoto = result.response.venue.photos;
+      const placeTip = result.response.venue.tips;
 
       this.placeInfoWindow.marker = selectedMarker;
 
@@ -378,18 +407,18 @@ export class Map extends Component {
         '</h2>' +
 
         (result.meta.code === 200 ? // If the user is in the 50 API Calls limit per day for place details
-          (placePhoto ?
+          (placePhoto.groups[0] && placePhoto.groups[0].items[0] ?
             '<img class="info-image" alt="place-image" src="' +  // Place photo url
-            placePhoto.prefix  +
+            placePhoto.groups[0].items[0].prefix  +
             'cap100' +
-            placePhoto.suffix +
+            placePhoto.groups[0].items[0].suffix +
             '">'
           :
             ''
           ) +
-          (placeTip.text ?
+          (placeTip.groups[0] && placeTip.groups[0].items[0] ?
             '<div class="info-tip">' +  // Place tip
-              placeTip.text +
+              placeTip.groups[0].items[0].text +
             '</div>'
           :
             ''
@@ -415,19 +444,18 @@ export class Map extends Component {
       }, 400);
       })
       .catch(error =>
-        console.log('Network Error. The infowindow will render only local data..')
+        console.log(error,'Network Error. The infowindow will render only local data..')
       );
     } else { // If the previously selected place is now unselected, close the infowindow
       this.placeInfoWindow.marker = null;
       this.placeInfoWindow.close();
     }
-
   }
 
   render() {
     return (
       <div className="map-message">
-        The map loads only when internet connection is available! Please Try to reload the page later..
+        Loading..
       </div>
     );
   }

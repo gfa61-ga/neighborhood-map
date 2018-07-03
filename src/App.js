@@ -86,6 +86,8 @@ class App extends Component {
     fetch('https://api.foursquare.com/v2/venues/explore?ll='
       + lat + ',' + lng +
       '&sortByDistance=1' +
+      '&limit=50' +
+      '&radius=650' +
       '&client_id=HPAOKFVI0WPGYVFGZW4QQVZTJPKCBCPWPQT3WULI3TKLTRUR' +
       '&client_secret=NILFKLKATY20ZQU1Q2OZVMRRPYMONJMG4OQ144SHHIEXGAMJ&v=20180625')
     .then(result => result.json())
