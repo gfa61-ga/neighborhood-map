@@ -169,7 +169,8 @@ export class Map extends Component {
         zoom: zoom,
         clickableIcons: false,
         styles: myStyles,
-        mapTypeControl: false
+        mapTypeControl: false,
+        fullscreenControl: false
       };
 
       // Load map
@@ -203,42 +204,40 @@ export class Map extends Component {
 
   // Use google Geocoder to get the location of the neighborhood's new address
   getNewLocation = () => {
-    if (this.props.google) {
+    // Create a Geocoder object
+    let geocoder = new this.props.google.maps.Geocoder();
 
-      // Create a Geocoder object
-      let geocoder = new this.props.google.maps.Geocoder();
+    // Get the new neighborhood's address from the location input field
+    let address = document.getElementById('location-input').value;
 
-      // Get the new neighborhood's address from the location input field
-      let address = document.getElementById('location-input').value;
+    // Check that the address is valid
+    if (address === '') {
+      swal('You must enter an area, or address!', '!!!', {
+        className: "alert-window",
+      });
+    } else { // Give the address and a callBack function to the geocoder
+      geocoder.geocode(
+        { address: address
+        }, (results, status) => { // This function is asynchronously called when the geocoder gets the results
+          if (status === 'OK') { // If the address is found get its location
+            let newLat = results[0].geometry.location.lat();
+            let newLng = results[0].geometry.location.lng();
 
-      // Check that the address is valid
-      if (address === '') {
-        swal('You must enter an area, or address!', '!!!', {
-          className: "alert-window",
-        });
-      } else { // Give the address and a callBack function to the geocoder
-        geocoder.geocode(
-          { address: address
-          }, (results, status) => { // This function is asynchronously called when the geocoder gets the results
-            if (status === 'OK') { // If the address is found get its location
-              let newLat = results[0].geometry.location.lat();
-              let newLng = results[0].geometry.location.lng();
-
-              // Call the onChangeNeighborhood() prop of the Map container, passing the new location
-              this.props.onChangeNeighborhood(newLat, newLng);
-            } else { // If the address is not found, alert the user and do nothing
-              swal('We could not find that location!', 'Try entering a more specific place.',  {
-                className: "alert-window",
-              });
-            }
-          });
+            // Call the onChangeNeighborhood() prop of the Map container, passing the new location
+            this.props.onChangeNeighborhood(newLat, newLng);
+          } else if (status === "ZERO_RESULTS") { // If the address is not found, alert the user and do nothing
+            swal('We could not find that location!', 'Try entering a more specific place.',  {
+              className: "alert-window",
+            });
+          } else { // If network is offline, alert the user when he clicks on 'Go to location' button
+            swal('There is no network connection!', 'Please try later..',  {
+              className: "alert-window",
+            });
+          }
         }
-      } else { // If google maps API is not loaded, alert the user when he clicks on 'Go to location' button
-        swal('There is no network connection!', 'Please try later..',  {
-          className: "alert-window",
-        });
-      }
+      );
     }
+  }
 
   createMarkers =() => {
     const google = this.props.google;
@@ -352,7 +351,8 @@ export class Map extends Component {
     })
 
     markerBounds.extend(this.props.initialCenter); // Include neighborhood center to bounds
-    this.map.fitBounds(markerBounds); // Center map to bounts
+
+    this.map.panTo(markerBounds.getCenter()); // Center map to bounts
   }
 
   // Animate the marker for the selected place and show place's details in an infowindow
@@ -393,59 +393,76 @@ export class Map extends Component {
         '&client_secret=NILFKLKATY20ZQU1Q2OZVMRRPYMONJMG4OQ144SHHIEXGAMJ&v=20180625')
       .then(result => result.json())
       .then(result => {
-      // Get place's photo and tip from the responce
-      const placePhoto = result.response.venue.photos;
-      const placeTip = result.response.venue.tips;
+        // Get place's photo and tip from the responce
+        const placePhoto = result.response.venue.photos;
+        const placeTip = result.response.venue.tips;
 
-      this.placeInfoWindow.marker = selectedMarker;
+        this.placeInfoWindow.marker = selectedMarker;
 
-      // Create infowindow content using place's general info and details
-      this.placeInfoWindow.setContent(
-        '<div class="info-window">' +
-        '<h2>' +
-        selectedPlace.venue.name +  // Place name
-        '</h2>' +
+        // Create infowindow content using place's general info and details
+        this.placeInfoWindow.setContent(
+          '<div class="info-window">' +
+          '<h2>' +
+          selectedPlace.venue.name +  // Place name
+          '</h2>' +
 
-        (result.meta.code === 200 ? // If the user is in the 50 API Calls limit per day for place details
-          (placePhoto.groups[0] && placePhoto.groups[0].items[0] ?
-            '<img class="info-image" alt="place-image" src="' +  // Place photo url
-            placePhoto.groups[0].items[0].prefix  +
-            'cap100' +
-            placePhoto.groups[0].items[0].suffix +
-            '">'
+          (result.meta.code === 200 ? // If the user is in the 50 API Calls limit per day for place details
+            (placePhoto.groups[0] && placePhoto.groups[0].items[0] ?
+              '<img class="info-image" alt="place-image" src="' +  // Place photo url
+              placePhoto.groups[0].items[0].prefix  +
+              'cap100' +
+              placePhoto.groups[0].items[0].suffix +
+              '">'
+            :
+              ''
+            ) +
+            (placeTip.groups[0] && placeTip.groups[0].items[0] ?
+              '<div class="info-tip">' +  // Place tip
+                placeTip.groups[0].items[0].text +
+              '</div>'
+            :
+              '<div class="info-tip"></div>'
+            )
           :
             ''
           ) +
-          (placeTip.groups[0] && placeTip.groups[0].items[0] ?
-            '<div class="info-tip">' +  // Place tip
-              placeTip.groups[0].items[0].text +
+
+          (selectedPlace.venue.location.address ?
+            '<div class=info-address>' +
+              selectedPlace.venue.location.address +  // Place address
             '</div>'
           :
             ''
-          )
-        :
-          ''
-        ) +
-
-        (selectedPlace.venue.location.address ?
-          '<div class=info-address>' +
-            selectedPlace.venue.location.address +  // Place address
+          ) +
           '</div>'
-        :
-          ''
-        ) +
+        );
 
-        '</div>'
-      );
-
-      // Show the infowindow when marker's animation ends
-      setTimeout(() => {
-        this.placeInfoWindow.open(this.map, selectedMarker);
-      }, 400);
+        // Show the infowindow when marker's animation ends
+        setTimeout(() => {
+          this.placeInfoWindow.open(this.map, selectedMarker);
+        }, 400);
       })
-      .catch(error =>
-        console.log(error,'Network Error. The infowindow will render only local data..')
-      );
+      .catch(error => { // If details fetch fails due to network problem, show only general place info
+        this.placeInfoWindow.marker = selectedMarker;
+
+        // Create infowindow content using place's general info and details
+        this.placeInfoWindow.setContent(
+          '<div class="info-window">' +
+          '<h2>' +
+          selectedPlace.venue.name +  // Place name
+          '</h2>' +
+
+          (selectedPlace.venue.location.address ?
+            '<div class=info-address>' +
+              selectedPlace.venue.location.address +  // Place address
+            '</div>'
+          :
+            ''
+          ) +
+          '</div>'
+        );
+        this.placeInfoWindow.open(this.map, selectedMarker);
+      });
     } else { // If the previously selected place is now unselected, close the infowindow
       this.placeInfoWindow.marker = null;
       this.placeInfoWindow.close();

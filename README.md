@@ -40,5 +40,18 @@ The user
 4. Can press the top left button to **toggle the visibility of the place list**.
 5. If Geolocation is available, can **reload** the App, **when he moves** to another neighborhood, **to get updated information**.
 
+## Dependencies
+This app is created using [create-react-app](https://www.npmjs.com/package/create-react-app) npm package, and is using the following additional packages:
+* [google-maps-react](https://www.npmjs.com/package/google-maps-react) - a helper to wrap around the Google maps API
+* [gh-pages](https://www.npmjs.com/package/gh-pages) - to publish the app to a gh-pages branch on GitHub. This package needs to add the following lines to the "scripts" key of package.json file:
+    >"predeploy": "npm run build",
+     "deploy": "gh-pages -d build"
+
+* [prop-types](https://www.npmjs.com/package/prop-types) - for runtime type checking for React props
+* [sweetalert](https://www.npmjs.com/package/sweetalert) - a beautiful replacement for JavaScript's "alert"
+* [webpack 3.11.0"](https://www.npmjs.com/package/webpack) - to build app for local usage in a browser (versions higher than 3.11.0 don't work),
+* [serve](https://www.npmjs.com/package/serve) - to serve the built version of the app locally
+
+
 ## License
 This code is distributed under the [MIT license](https://opensource.org/licenses/MIT).
