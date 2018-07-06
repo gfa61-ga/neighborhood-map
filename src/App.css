@@ -251,3 +251,30 @@ body {
   background-color: #b7d3e2;
 }
 
+.map-message {
+  display: grid;
+  grid-template-columns: auto;
+  height: 100%;
+  align-items: center;
+  justify-items: center;
+  align-content: center;
+  text-align: center;
+}
+
+.map-message ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.map-message ul li{
+  font-size: 0.9em;
+  color: #3b3b3b;
+  text-align: left;
+}
+
+.map-message ul li:before {
+  font-size: 0.7em;
+  content: '✓ ';
+  font-weight: bold;
+  vertical-align: super;
+}

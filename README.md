@@ -14,10 +14,11 @@ To run the app in production mode:
 ## Offline-First Considerations
 
 If you need run a build version of the app, in order to test your offline-first service worker locally:
-1. Remove the "homepage" line from package.json file, if any
-2. Build the application with `npm run build`
-3. Run a simple http server from your build application with `serve -s build`
-4. With your server running, visit the app in your browser at: `http://localhost:5000/`
+1. Install a simple http server with `npm install -g serve` (this step is required only once)
+2. Remove the "homepage" line from package.json file, if any
+3. Build the application with `npm run build`
+4. Run the simple http server from your build application with `serve -s build`
+5. With your server running, visit the app in your browser at: `http://localhost:5000/`
 
 ## Github pages deployment
 

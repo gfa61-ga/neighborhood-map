@@ -4,7 +4,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import initialData from './initial-data.js';
-import MapContainer from'./MapContainer.js';
+import Map from'./Map.js';
 import PlaceList from'./PlaceList.js';
 import PlaceFilter from'./PlaceFilter.js';
 
@@ -23,15 +23,19 @@ class App extends Component {
     zoom: 17,
     results: initialData,  // General information from 30 places recommended by fourSquare
     selectedItemId: '', // '' indicates that there is no place selected
-    selectedCategory: 'All Places'
+    selectedCategory: 'All Places',
+    online: false
   };
 
   // The categories we use to filter places
   categories = [];
 
+  appHasRendered = false;
+
   // Create categories before rendering the App
   componentWillMount() {
     this.createCategories(this.state.results);
+    this.setState({online: navigator.onLine});
   }
 
   // Create categories using results from a fourSquare 'Get Venue Recommendations' response which contains 30 place items
@@ -56,9 +60,25 @@ class App extends Component {
     this.categories.unshift("All Places");
   }
 
-  // When the App is rendered add a click listener to the 'hide-list-button'
+  // When the App is rendered 
   componentDidMount() {
+    // Add a click listener to the 'hide-list-button'
     document.getElementById('hide-list-button').addEventListener('click', this.togglePlaceList);
+
+    // Add listeners for network status and update state 
+    window.addEventListener('online', (event) => {
+      this.setState({
+        online: navigator.onLine
+      });
+    });
+
+    window.addEventListener('offline', (event) => {
+      this.setState({
+        online: navigator.onLine
+      });
+    });
+
+    this.appHasRendered = true;
   }
 
   // When a new category is selected update state and clear selectedItem
@@ -153,16 +173,32 @@ class App extends Component {
 
         <div className="list-footer"/>
         <div id="map-area">
-          <MapContainer
-            google={this.props.google}
-            initialCenter={state.neighborhhoodLocation}
-            zoom={state.zoom}
-            onChangeNeighborhood={this.onChangeNeighborhood}
-            results={state.results}
-            onClickMarker={this.onClickMarker}
-            selectedItemId={state.selectedItemId}
-            selectedCategory={state.selectedCategory}
-          />
+          { /* If this is the first time app renders 
+             *  and network is offline, display map-message
+             */
+            (this.state.online || this.appHasRendered) 
+          ?
+            <Map
+              initialCenter={state.neighborhhoodLocation}
+              zoom={state.zoom}
+              onChangeNeighborhood={this.onChangeNeighborhood}
+              results={state.results}
+              onClickMarker={this.onClickMarker}
+              selectedItemId={state.selectedItemId}
+              selectedCategory={state.selectedCategory}
+            />
+          :
+            <div className="map-message">
+              <p>
+                You are offline..!!
+                <ul>
+                  <li>NeighborHood Map will load and </li>
+                  <li>Go button will start to work</li>
+                </ul>
+                when you go online..
+              </p>
+            </div>
+          }
         </div>
       </div>
     );
@@ -170,3 +206,4 @@ class App extends Component {
 }
 
 export default App;
+

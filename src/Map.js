@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import swal from 'sweetalert';
+import { GoogleApiWrapper } from 'google-maps-react';
 
 export class Map extends Component {
   static propTypes = {
@@ -470,12 +471,12 @@ export class Map extends Component {
   }
 
   render() {
-    return (
-      <div className="map-message">
-        Loading..
-      </div>
-    );
+    return null;
   }
 }
 
-export default Map;
+// GoogleApiWrapper asynchronously loads the Google Maps API and passes is to the Map as 'google' prop
+export default GoogleApiWrapper({
+  apiKey: 'AIzaSyDoF5xjAASOfupCeQwuTUrPYdRwrYvC6AI',
+  libraries: ['places']
+})(Map);
