@@ -30,7 +30,7 @@ class App extends Component {
   // The categories we use to filter places
   categories = [];
 
-  appHasRendered = false;
+  appAreaHasRendered = false;
 
   // Create categories before rendering the App
   componentWillMount() {
@@ -77,8 +77,18 @@ class App extends Component {
         online: navigator.onLine
       });
     });
+    
+    // If app online when loaded, the map-area has rendered
+    if (this.state.online) {
+      this.appAreaHasRendered = true;
+    }
+  }
 
-    this.appHasRendered = true;
+  componentDidUpdate() {
+    // If app offline when loaded, the map-area will render when app goes online
+    if (this.state.online) {
+      this.appAreaHasRendered = true;
+    }
   }
 
   // When a new category is selected update state and clear selectedItem
@@ -91,7 +101,11 @@ class App extends Component {
 
   // When a new place is selected in place list, update state
   onClickListItem = (event) => {
-    this.setState({selectedItemId: event.target.id})
+    if (this.appAreaHasRendered) {
+      this.setState({
+        selectedItemId: event.target.id
+      });
+    }
   }
 
   // When the 'hide-list-button' is press toggle (show / hide) the place list using CSS
@@ -173,10 +187,10 @@ class App extends Component {
 
         <div className="list-footer"/>
         <div id="map-area">
-          { /* If this is the first time app renders 
+          { /* If this is the first time map-area renders 
              *  and network is offline, display map-message
              */
-            (this.state.online || this.appHasRendered) 
+            (this.state.online || this.appAreaHasRendered) 
           ?
             <Map
               initialCenter={state.neighborhhoodLocation}

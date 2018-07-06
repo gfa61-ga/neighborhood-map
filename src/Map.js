@@ -200,6 +200,13 @@ export class Map extends Component {
         google.maps.event.trigger(this.map, "resize");
         this.map.fitBounds(this.markerBounds);
       });
+
+      // Take care the map not to zoom too close
+      google.maps.event.addDomListener(this.map, "zoom_changed", () => {
+        if (this.map.getZoom() > 17) {
+          this.map.setZoom(17);
+        }
+      });
     }
   }
 
@@ -352,7 +359,7 @@ export class Map extends Component {
     })
 
     markerBounds.extend(this.props.initialCenter); // Include neighborhood center to bounds
-
+    this.map.fitBounds(markerBounds);
     this.map.panTo(markerBounds.getCenter()); // Center map to bounts
   }
 
