@@ -171,8 +171,18 @@ class App extends Component {
           <div className="neighborhood-location">
             <input id="location-input" type="text"
               defaultValue="Pl. Ipsilon Alonion, Patras, Greece" aria-label="Neighborhhood Location"/>
-            <input id="location-button" type="button" value="Go" aria-label="Go to location"/>
-            <input id="hide-list-button" type="button" value="&#9776;" aria-label="Toggle place list's visibility"/>
+            <input 
+              id="location-button" 
+              type="button" 
+              value="Go" 
+              aria-label="Go to location" 
+              tabIndex="0"/>
+            <input 
+              id="hide-list-button" 
+              type="button" 
+              value="&#9776;" 
+              aria-label="Toggle place list's visibility" 
+              tabIndex="0"/>
           </div>
         </div>
 
@@ -186,13 +196,13 @@ class App extends Component {
         </div>
 
         <div className="list-footer"/>
-        <div id="map-area">
+        <div id="map-area" tabindex="0" role="application" aria-label="Neighborhhood map">
           { /* If this is the first time map-area renders 
              *  and network is offline, display map-message
              */
             (this.state.online || this.appAreaHasRendered) 
           ?
-            <Map
+            <Map  
               initialCenter={state.neighborhhoodLocation}
               zoom={state.zoom}
               onChangeNeighborhood={this.onChangeNeighborhood}

@@ -9,10 +9,17 @@ export class PlaceList extends Component {
     selectedCategory: PropTypes.string.isRequired
   };
 
-  // When the list renders, bind a click listener to it
+  // When the list renders, bind click listeners to it
   componentDidMount() {
     document.querySelector('.place-list').addEventListener('click', e =>
       this.props.onClickListItem(e)  // When the user clicks on a list item call onClickListItem to update App's selectedItemId state
+    );
+
+    document.querySelector('.place-list').addEventListener('keydown', e => {
+        if (e.keyCode === 32) { 
+          this.props.onClickListItem(e)  // When the user press SPACE button on a focused list item, call onClickListItem to update App's selectedItemId state
+        }
+      }
     );
   }
 
@@ -22,7 +29,7 @@ export class PlaceList extends Component {
 
     // Only the places of the selectedCategory are rendered in the <ul> list
     return (
-      <ul role="menu" aria-label="menu">
+      <ul role="menu">
           { /* Find places of the selectedCategory */
             props.items.filter(place => {
               const placeCategory = place.venue.categories[0].shortName;
@@ -32,7 +39,6 @@ export class PlaceList extends Component {
               <li
                 key={place.venue.id}
                 id={place.venue.id}
-                role="menuitem"
                 tabIndex="0"
                 className={place.venue.id === props.selectedItemId ? 'selected' : ''} /* Use CSS to spot the selected place*/
                 >

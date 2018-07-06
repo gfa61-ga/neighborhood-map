@@ -17,7 +17,7 @@ export class PlaceFilter extends Component {
   // Render a <select> item with all the categories
   render() {
     return (
-    <select id="place-filter" aria-label="Places filter">
+    <select id="place-filter" aria-label="Places filter" tabIndex="0">
       {
         this.props.categories.map(category =>
           <option

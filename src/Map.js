@@ -409,7 +409,7 @@ export class Map extends Component {
 
         // Create infowindow content using place's general info and details
         this.placeInfoWindow.setContent(
-          '<div class="info-window">' +
+          '<div class="info-window" tabIndex="0" aria-label="place info">' +
           '<h2>' +
           selectedPlace.venue.name +  // Place name
           '</h2>' +
@@ -455,7 +455,7 @@ export class Map extends Component {
 
         // Create infowindow content using place's general info and details
         this.placeInfoWindow.setContent(
-          '<div class="info-window">' +
+          '<div class="info-window" tabIndex="0" aria-label="place info">' +
           '<h2>' +
           selectedPlace.venue.name +  // Place name
           '</h2>' +
