@@ -30,7 +30,7 @@ class App extends Component {
   // The categories we use to filter places
   categories = [];
 
-  appAreaHasRendered = false;
+  mapAreaHasRendered = false;
 
   // Create categories before rendering the App
   componentWillMount() {
@@ -60,12 +60,12 @@ class App extends Component {
     this.categories.unshift("All Places");
   }
 
-  // When the App is rendered 
+  // When the App is rendered
   componentDidMount() {
     // Add a click listener to the 'hide-list-button'
     document.getElementById('hide-list-button').addEventListener('click', this.togglePlaceList);
 
-    // Add listeners for network status and update state 
+    // Add listeners for network status and update state
     window.addEventListener('online', (event) => {
       this.setState({
         online: navigator.onLine
@@ -77,17 +77,17 @@ class App extends Component {
         online: navigator.onLine
       });
     });
-    
+
     // If app online when loaded, the map-area has rendered
     if (this.state.online) {
-      this.appAreaHasRendered = true;
+      this.mapAreaHasRendered = true;
     }
   }
 
   componentDidUpdate() {
     // If app offline when loaded, the map-area will render when app goes online
     if (this.state.online) {
-      this.appAreaHasRendered = true;
+      this.mapAreaHasRendered = true;
     }
   }
 
@@ -101,7 +101,7 @@ class App extends Component {
 
   // When a new place is selected in place list, update state
   onClickListItem = (event) => {
-    if (this.appAreaHasRendered) {
+    if (this.mapAreaHasRendered) {
       this.setState({
         selectedItemId: event.target.id
       });
@@ -171,17 +171,17 @@ class App extends Component {
           <div className="neighborhood-location">
             <input id="location-input" type="text"
               defaultValue="Pl. Ipsilon Alonion, Patras, Greece" aria-label="Neighborhhood Location"/>
-            <input 
-              id="location-button" 
-              type="button" 
-              value="Go" 
-              aria-label="Go to location" 
+            <input
+              id="location-button"
+              type="button"
+              value="Go"
+              aria-label="Go to location"
               tabIndex="0"/>
-            <input 
-              id="hide-list-button" 
-              type="button" 
-              value="&#9776;" 
-              aria-label="Toggle place list's visibility" 
+            <input
+              id="hide-list-button"
+              type="button"
+              value="&#9776;"
+              aria-label="Toggle place list's visibility"
               tabIndex="0"/>
           </div>
         </div>
@@ -196,13 +196,13 @@ class App extends Component {
         </div>
 
         <div className="list-footer"/>
-        <div id="map-area" tabindex="0" role="application" aria-label="Neighborhhood map">
-          { /* If this is the first time map-area renders 
+        <div id="map-area" tabIndex="0" role="application" aria-label="Neighborhhood map">
+          { /* If this is the first time map-area renders
              *  and network is offline, display map-message
              */
-            (this.state.online || this.appAreaHasRendered) 
+            (this.state.online || this.mapAreaHasRendered)
           ?
-            <Map  
+            <Map
               initialCenter={state.neighborhhoodLocation}
               zoom={state.zoom}
               onChangeNeighborhood={this.onChangeNeighborhood}

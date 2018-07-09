@@ -17,14 +17,16 @@ If you need run a build version of the app, in order to test your offline-first 
 1. Install a simple http server with `npm install -g serve` (this step is required only once)
 2. Remove the "homepage" line from package.json file, if any
 3. Build the application with `npm run build`
-4. Run the simple http server from your build application with `serve -s build`
-5. With your server running, visit the app in your browser at: `http://localhost:5000/`
+4. Copy the 'service-worker.js' file and paste it into the 'build' folder to override the default serviceWorker
+5. Run the simple http server from your build application with `serve -s build`
+6. With your server running, visit the app in your browser at: `http://localhost:5000/`
 
 ## Github pages deployment
 
 To deploy the app on gitHub pages:
 1. Add `"homepage": "https://gfa61-ga.github.io/neighborhood-map"` in package.json file
 2. Deploy the app with `npm run deploy`
+3. Copy 'service-worker.js' file's content and paste it into the 'service-worker.js' file, in gh-pages branch of github, to override the default serviceWorker
 
 ## App Functionality
 
