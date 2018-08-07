@@ -169,7 +169,7 @@ class App extends Component {
             />
           </div>
           <div className="neighborhood-location">
-            <input id="location-input" type="text"
+            <input id="location-input" type="search"
               defaultValue="Pl. Ipsilon Alonion, Patras, Greece" aria-label="Neighborhhood Location"/>
             <input
               id="location-button"

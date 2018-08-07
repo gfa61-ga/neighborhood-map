@@ -135,7 +135,6 @@ body {
 
 #map-area {
   background-color: #d0d0d0;
-
   grid-column: 1 / span 2;
   grid-row: 4;
 }

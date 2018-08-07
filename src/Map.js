@@ -401,8 +401,8 @@ export class Map extends Component {
         '&client_secret=NILFKLKATY20ZQU1Q2OZVMRRPYMONJMG4OQ144SHHIEXGAMJ&v=20180625')
       .then(result => result.json())
       .then(result => {
-        // Get place's photo and tip from the responce
-        const placePhoto = result.response.venue.photos;
+        // Get place's bestphoto and tip from the responce
+        const placePhoto = result.response.venue.bestPhoto;
         const placeTip = result.response.venue.tips;
 
         this.placeInfoWindow.marker = selectedMarker;
@@ -415,11 +415,11 @@ export class Map extends Component {
           '</h2>' +
 
           (result.meta.code === 200 ? // If the user is in the 50 API Calls limit per day for place details
-            (placePhoto.groups[0] && placePhoto.groups[0].items[0] ?
+            (placePhoto ?
               '<img class="info-image" alt="place-image" src="' +  // Place photo url
-              placePhoto.groups[0].items[0].prefix  +
+              placePhoto.prefix  +
               'cap100' +
-              placePhoto.groups[0].items[0].suffix +
+              placePhoto.suffix +
               '">'
             :
               ''
